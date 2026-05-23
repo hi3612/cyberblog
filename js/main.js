@@ -1,7 +1,28 @@
 /* ============================================================
-   CYBERPUNK BLOG — Complete JavaScript
+   CYBERPUNK BLOG — Complete Interactive JavaScript
    ============================================================ */
 
+/* ============================================================
+   DATA STORES (localStorage-backed)
+   ============================================================ */
+const DB = {
+  getUsers() { return JSON.parse(localStorage.getItem('cb-users') || '[]'); },
+  saveUsers(u) { localStorage.setItem('cb-users', JSON.stringify(u)); },
+  getCurrentUser() { return JSON.parse(localStorage.getItem('cb-currentUser') || 'null'); },
+  setCurrentUser(u) { localStorage.setItem('cb-currentUser', JSON.stringify(u)); },
+  getComments() { return JSON.parse(localStorage.getItem('cb-comments') || '[]'); },
+  saveComments(c) { localStorage.setItem('cb-comments', JSON.stringify(c)); },
+  getLikes() { return JSON.parse(localStorage.getItem('cb-likes') || '{}'); },
+  saveLikes(l) { localStorage.setItem('cb-likes', JSON.stringify(l)); },
+  getMessages() { return JSON.parse(localStorage.getItem('cb-messages') || '[]'); },
+  saveMessages(m) { localStorage.setItem('cb-messages', JSON.stringify(m)); },
+  getReadingHistory() { return JSON.parse(localStorage.getItem('cb-history') || '[]'); },
+  saveReadingHistory(h) { localStorage.setItem('cb-history', JSON.stringify(h)); },
+};
+
+/* ============================================================
+   BOOT & MAIN INIT
+   ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
   initBootSequence(() => {
     initNoiseOverlay();
@@ -12,7 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initScrollEffects();
     initReadingProgress();
     initThemeSwitcher();
+    initAuthUI();
     initBlogSection();
+    initGuestbook();
     initNewsletter();
     initBackToTop();
     initSmoothScroll();
@@ -23,65 +46,49 @@ document.addEventListener('DOMContentLoaded', () => {
     initKeyboardShortcuts();
     initKonamiCode();
     initRSS();
+    initGlobalModals();
     initCardTilt();
   });
 });
 
-/* ============================================================
-   BOOT SEQUENCE
-   ============================================================ */
+/* --- Boot --- */
 function initBootSequence(callback) {
   const screen = document.getElementById('boot-screen');
   const log = document.getElementById('boot-log');
   if (!screen || !log) { callback(); return; }
-
-  const bootLines = [
-    { text: 'CYBER//BLOG Firmware v4.7.1', cls: '' },
-    { text: 'Copyright (c) 2026 终末之剑', cls: 'info' },
-    { text: '', cls: '' },
-    { text: '[BIOS] Initializing hardware abstraction layer...', cls: '' },
-    { text: '[BIOS] Memory test: 64GB OK', cls: 'ok' },
-    { text: '[BIOS] CPU: NEUROMANCER-X 16 cores @ 4.2GHz', cls: 'ok' },
-    { text: '[BIOS] Neural interface: ONLINE', cls: 'ok' },
-    { text: '', cls: '' },
-    { text: '[KERNEL] Loading cyberpunk.sys...', cls: '' },
-    { text: '[KERNEL] Mounting /dev/reality...', cls: 'ok' },
-    { text: '[KERNEL] Loading network stack...', cls: '' },
-    { text: '[KERNEL] Connecting to THE NET...', cls: 'ok' },
-    { text: '[KERNEL] Firewall: ACTIVE | Encryption: AES-256', cls: 'info' },
-    { text: '', cls: '' },
-    { text: '[INIT] Starting services...', cls: '' },
-    { text: '[INIT] neon-driver.service: STARTED', cls: 'ok' },
-    { text: '[INIT] matrix-daemon.service: STARTED', cls: 'ok' },
-    { text: '[INIT] blog-engine.service: STARTED', cls: 'ok' },
-    { text: '[INIT] aesthetic-module.service: STARTED', cls: 'ok' },
-    { text: '', cls: '' },
-    { text: '[LOGIN] Authenticating...', cls: '' },
-    { text: '[LOGIN] Welcome back, 终末之剑', cls: 'ok' },
-    { text: '', cls: '' },
-    { text: '> SYSTEM READY <', cls: 'ok' },
+  const lines = [
+    { t: 'CYBER//BLOG Firmware v4.7.1', c: '' },
+    { t: '', c: '' },
+    { t: '[BIOS] Initializing hardware...', c: '' },
+    { t: '[BIOS] Memory test: 64GB OK', c: 'ok' },
+    { t: '[BIOS] Neural interface: ONLINE', c: 'ok' },
+    { t: '', c: '' },
+    { t: '[KERNEL] Loading cyberpunk.sys...', c: '' },
+    { t: '[KERNEL] Network stack: ONLINE', c: 'ok' },
+    { t: '[KERNEL] Firewall: ACTIVE', c: 'info' },
+    { t: '', c: '' },
+    { t: '[INIT] neon-driver.service: STARTED', c: 'ok' },
+    { t: '[INIT] matrix-daemon.service: STARTED', c: 'ok' },
+    { t: '[INIT] blog-engine.service: STARTED', c: 'ok' },
+    { t: '', c: '' },
+    { t: '[LOGIN] Authenticating...', c: '' },
+    { t: '[LOGIN] Welcome back, 终末之剑', c: 'ok' },
+    { t: '', c: '' },
+    { t: '> SYSTEM READY <', c: 'ok' },
   ];
-
   let i = 0;
-  function nextLine() {
-    if (i >= bootLines.length) {
-      setTimeout(() => {
-        screen.classList.add('done');
-        setTimeout(callback, 600);
-      }, 300);
-      return;
-    }
-    const { text, cls } = bootLines[i];
-    const div = document.createElement('div');
-    if (cls) div.className = cls;
-    div.textContent = text || ' ';
-    log.appendChild(div);
+  function next() {
+    if (i >= lines.length) { setTimeout(() => { screen.classList.add('done'); setTimeout(callback, 600); }, 300); return; }
+    const { t, c } = lines[i];
+    const d = document.createElement('div');
+    if (c) d.className = c;
+    d.textContent = t || '\xa0';
+    log.appendChild(d);
     log.scrollTop = log.scrollHeight;
     i++;
-    const delay = text === '' ? 80 : Math.random() * 80 + 40;
-    setTimeout(nextLine, delay);
+    setTimeout(next, t === '' ? 80 : Math.random() * 80 + 40);
   }
-  nextLine();
+  next();
 }
 
 /* --- Noise --- */
@@ -91,281 +98,152 @@ function initNoiseOverlay() {
   canvas.style.cssText = 'position:fixed;inset:0;z-index:9998;pointer-events:none;opacity:0.03;';
   document.body.appendChild(canvas);
   const ctx = canvas.getContext('2d');
-  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-  resize(); window.addEventListener('resize', resize);
-  function drawNoise() {
+  function rs() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  rs(); window.addEventListener('resize', rs);
+  function draw() {
     const w = canvas.width, h = canvas.height;
-    const imageData = ctx.createImageData(w, h);
-    const data = imageData.data;
-    for (let i = 0; i < data.length; i += 4) {
-      const n = Math.random() * 255;
-      data[i] = n; data[i + 1] = n; data[i + 2] = n;
-      data[i + 3] = Math.random() * 20;
-    }
-    ctx.putImageData(imageData, 0, 0);
-    requestAnimationFrame(() => { setTimeout(drawNoise, 100); });
+    const d = ctx.createImageData(w, h).data;
+    for (let i = 0; i < d.length; i += 4) { const n = Math.random() * 255; d[i] = n; d[i + 1] = n; d[i + 2] = n; d[i + 3] = Math.random() * 20; }
+    ctx.putImageData(new ImageData(d, w, h), 0, 0);
+    requestAnimationFrame(() => setTimeout(draw, 100));
   }
-  drawNoise();
+  draw();
 }
 
 /* --- Mouse Glow --- */
 function initMouseGlow() {
-  const glow = document.createElement('div');
-  glow.className = 'mouse-glow';
-  document.body.appendChild(glow);
-  document.addEventListener('mousemove', (e) => {
-    glow.style.left = e.clientX + 'px';
-    glow.style.top = e.clientY + 'px';
-  });
+  const g = document.createElement('div'); g.className = 'mouse-glow'; document.body.appendChild(g);
+  document.addEventListener('mousemove', e => { g.style.left = e.clientX + 'px'; g.style.top = e.clientY + 'px'; });
 }
 
 /* --- Matrix Rain --- */
 function initMatrixRain() {
-  const canvas = document.getElementById('matrix-bg');
-  if (!canvas) return;
+  const canvas = document.getElementById('matrix-bg'); if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  function resize() { canvas.width = canvas.parentElement.offsetWidth; canvas.height = canvas.parentElement.offsetHeight; }
-  resize(); window.addEventListener('resize', resize);
-  const fontSize = 14;
-  let columns = Math.floor(canvas.width / fontSize);
-  let drops = new Array(columns).fill(0);
+  function rs() { canvas.width = canvas.parentElement.offsetWidth; canvas.height = canvas.parentElement.offsetHeight; }
+  rs(); window.addEventListener('resize', rs);
+  const fs = 14;
+  let cols = Math.floor(canvas.width / fs);
+  let drops = new Array(cols).fill(0);
   const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEF><{}[]|/\\';
-  window.addEventListener('resize', () => { columns = Math.floor(canvas.width / fontSize); drops = new Array(columns).fill(0); });
+  window.addEventListener('resize', () => { cols = Math.floor(canvas.width / fs); drops = new Array(cols).fill(0); });
   function draw() {
     ctx.fillStyle = 'rgba(6,6,8,0.06)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.font = fontSize + 'px "JetBrains Mono", monospace';
+    ctx.font = fs + 'px "JetBrains Mono", monospace';
     for (let i = 0; i < drops.length; i++) {
-      const x = i * fontSize, y = drops[i] * fontSize;
+      const x = i * fs, y = drops[i] * fs;
       ctx.fillStyle = '#00ff41'; ctx.fillText(chars[Math.floor(Math.random() * chars.length)], x, y);
-      for (let j = 1; j < 6; j++) {
-        const ty = y - j * fontSize; if (ty < 0) continue;
-        const alpha = 0.06 - j * 0.01; if (alpha <= 0) continue;
-        ctx.fillStyle = `rgba(0,255,65,${alpha})`;
-        ctx.fillText(chars[Math.floor(Math.random() * chars.length)], x, ty);
-      }
+      for (let j = 1; j < 5; j++) { const ty = y - j * fs; if (ty < 0) continue; ctx.fillStyle = `rgba(0,255,65,${0.05 - j * 0.01})`; if (0.05 - j * 0.01 > 0) ctx.fillText(chars[Math.floor(Math.random() * chars.length)], x, ty); }
       if (y > canvas.height && Math.random() > 0.975) drops[i] = 0;
       drops[i]++;
     }
   }
   setInterval(draw, 55);
-
-  // Store reference for terminal command
-  window._matrixCanvas = canvas;
-  window._matrixIntensity = 1;
-  window._matrixInterval = setInterval(draw, 55);
+  window._matrixCanvas = canvas; window._matrixIntensity = 1;
 }
 
 /* --- Typing + Interactive Terminal --- */
 function initTypingEffect() {
-  const el = document.getElementById('typing-text');
-  if (!el) return;
-
+  const el = document.getElementById('typing-text'); if (!el) return;
   const lines = [
     { text: '> ssh cyberblog --connect', delay: 400, isCmd: true },
-    { text: '', delay: 120 },
-    { text: '[AUTH] 身份验证中...', delay: 300 },
-    { text: '[AUTH] 生物特征识别通过 &#10003;', delay: 300 },
-    { text: '[SYS] 加载用户配置...', delay: 250 },
-    { text: '', delay: 120 },
-    { text: '> cat ~/identity.dat', delay: 350, isCmd: true },
-    { text: '', delay: 120 },
+    { text: '', delay: 100 },
+    { text: '[AUTH] 身份验证中...', delay: 280 },
+    { text: '[AUTH] 生物特征识别通过 &#10003;', delay: 280 },
+    { text: '', delay: 100 },
+    { text: '> cat ~/identity.dat', delay: 320, isCmd: true },
+    { text: '', delay: 100 },
     { text: 'NAME:    <span class="highlight">终末之剑</span>', delay: 400 },
     { text: 'ROLE:    <span class="highlight">全栈开发者 / 开源贡献者</span>', delay: 400 },
     { text: 'STATUS:  <span class="highlight">ACTIVE // 持续学习中</span>', delay: 400 },
-    { text: '', delay: 120 },
-    { text: '> cat ~/stack.dat', delay: 300, isCmd: true },
-    { text: '', delay: 120 },
-    { text: 'LANG:    JavaScript · TypeScript · Python · Go', delay: 400 },
-    { text: 'FE:      React · Vue · Three.js · WebGL · CSS', delay: 400 },
-    { text: 'BE:      Node.js · PostgreSQL · Redis · Docker', delay: 400 },
-    { text: 'TOOLS:   Git · Linux · Vim · AWS · CI/CD', delay: 400 },
-    { text: '', delay: 120 },
-    { text: '> echo $STATUS', delay: 300, isCmd: true },
-    { text: '', delay: 120 },
+    { text: '', delay: 100 },
+    { text: '> echo $STATUS', delay: 280, isCmd: true },
+    { text: '', delay: 100 },
     { text: '<span class="highlight">// ALL SYSTEMS OPERATIONAL</span>', delay: 500 },
-    { text: '', delay: 200 },
-    { text: '<span class="info">输入 help 查看可用命令...</span>', delay: 400 },
+    { text: '', delay: 180 },
+    { text: '<span class="info">输入 help 查看可用命令...</span>', delay: 350 },
   ];
+  let lineIdx = 0, charIdx = 0, curLine = '';
 
-  let lineIndex = 0, charIndex = 0, currentLine = '';
-
-  function getPreviousLines() {
-    const rendered = [];
-    for (let i = 0; i < lineIndex; i++) {
+  function prevLines() {
+    const r = [];
+    for (let i = 0; i < lineIdx; i++) {
       const { text, isCmd } = lines[i];
-      if (isCmd) rendered.push('<span class="prompt">root@cyberblog:~#</span> ' + text + '<br>');
-      else rendered.push(text + '<br>');
+      if (isCmd) r.push('<span class="prompt">root@cyberblog:~#</span> ' + text + '<br>');
+      else r.push(text + '<br>');
     }
-    return rendered.join('');
+    return r.join('');
   }
 
   function typeChar() {
-    if (lineIndex >= lines.length) { finishTyping(); return; }
-    const { text, delay, isCmd } = lines[lineIndex];
-    if (charIndex === 0) { currentLine = ''; if (isCmd) { el.innerHTML += '<span class="prompt">root@cyberblog:~#</span> '; } }
-    if (charIndex < text.length) {
-      if (text[charIndex] === '<') {
-        const tagEnd = text.indexOf('>', charIndex);
-        if (tagEnd !== -1) { currentLine += text.substring(charIndex, tagEnd + 1); charIndex = tagEnd + 1; el.innerHTML = getPreviousLines() + currentLine; setTimeout(typeChar, 0); return; }
-      }
-      currentLine += text[charIndex]; el.innerHTML = getPreviousLines() + currentLine;
-      charIndex++; setTimeout(typeChar, Math.random() * 25 + 12);
+    if (lineIdx >= lines.length) { finishTyping(); return; }
+    const { text, delay, isCmd } = lines[lineIdx];
+    if (charIdx === 0) { curLine = ''; if (isCmd) el.innerHTML += '<span class="prompt">root@cyberblog:~#</span> '; }
+    if (charIdx < text.length) {
+      if (text[charIdx] === '<') { const te = text.indexOf('>', charIdx); if (te !== -1) { curLine += text.substring(charIdx, te + 1); charIdx = te + 1; el.innerHTML = prevLines() + curLine; setTimeout(typeChar, 0); return; } }
+      curLine += text[charIdx]; el.innerHTML = prevLines() + curLine;
+      charIdx++; setTimeout(typeChar, Math.random() * 22 + 10);
     } else {
-      el.innerHTML = getPreviousLines() + currentLine + '<br>';
-      lineIndex++; charIndex = 0; setTimeout(typeChar, delay);
+      el.innerHTML = prevLines() + curLine + '<br>';
+      lineIdx++; charIdx = 0; setTimeout(typeChar, delay);
     }
   }
 
   function finishTyping() {
-    // Remove cursor
-    const oldCursor = el.querySelector('.cursor');
-    if (oldCursor) oldCursor.remove();
-
-    // Add interactive input line
-    addTerminalPrompt();
+    const c = el.querySelector('.cursor'); if (c) c.remove();
+    addPrompt();
   }
 
-  function addTerminalPrompt() {
-    const container = document.createElement('div');
-    container.className = 'terminal-input-line';
-    container.innerHTML = '<span class="prompt">root@cyberblog:~#</span>';
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.id = 'terminal-input';
-    input.placeholder = '输入 help 查看命令...';
-    input.autocomplete = 'off';
-    input.spellcheck = false;
-    container.appendChild(input);
-    el.appendChild(container);
+  function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
-    input.focus();
-
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        const cmd = input.value.trim().toLowerCase();
-        input.value = '';
-        executeTerminalCommand(cmd);
-      }
+  function addPrompt() {
+    const div = document.createElement('div'); div.className = 'terminal-input-line';
+    div.innerHTML = '<span class="prompt">root@cyberblog:~#</span>';
+    const inp = document.createElement('input');
+    inp.type = 'text'; inp.id = 'terminal-input';
+    inp.placeholder = '输入 help 查看命令...'; inp.autocomplete = 'off'; inp.spellcheck = false;
+    div.appendChild(inp); el.appendChild(div);
+    inp.focus();
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { const cmd = inp.value.trim().toLowerCase(); inp.value = ''; exec(cmd); }
     });
-
-    // Focus input when clicking terminal
-    document.getElementById('main-terminal').addEventListener('click', (e) => {
-      if (e.target.tagName !== 'INPUT') input.focus();
-    });
+    document.getElementById('main-terminal').addEventListener('click', e => { if (e.target.tagName !== 'INPUT') inp.focus(); });
   }
 
-  function executeTerminalCommand(cmd) {
-    const output = document.createElement('div');
-    output.className = 'terminal-output-line';
-    output.innerHTML = '<span class="cmd-echo">root@cyberblog:~#</span> ' + escapeHtml(cmd);
+  function exec(cmd) {
+    const out = document.createElement('div'); out.className = 'terminal-output-line';
+    out.innerHTML = '<span class="cmd-echo">root@cyberblog:~#</span> ' + escHtml(cmd);
+    const old = document.getElementById('terminal-input'); const oldC = old ? old.parentElement : null;
+    if (oldC) oldC.replaceWith(out); else el.appendChild(out);
 
-    // Remove old input line
-    const oldInput = document.getElementById('terminal-input');
-    const oldContainer = oldInput ? oldInput.parentElement : null;
-
-    if (oldContainer) {
-      oldContainer.replaceWith(output);
-    } else {
-      el.appendChild(output);
-    }
-
-    // Handle commands
     let result = '';
-    if (!cmd) {
-      result = '';
-    } else if (cmd === 'help') {
-      result = `
-        <span class="cyan">可用命令列表:</span><br>
-        <span class="cmd-echo">help</span>       - 显示此帮助信息<br>
-        <span class="cmd-echo">whoami</span>     - 显示个人信息<br>
-        <span class="cmd-echo">neofetch</span>   - 显示系统信息<br>
-        <span class="cmd-echo">ls</span>         - 列出网站板块<br>
-        <span class="cmd-echo">cat blog</span>   - 跳转到博客<br>
-        <span class="cmd-echo">cat about</span>  - 跳转到关于<br>
-        <span class="cmd-echo">date</span>       - 显示当前时间<br>
-        <span class="cmd-echo">theme &lt;g|c|m&gt;</span> - 切换主题<br>
-        <span class="cmd-echo">matrix</span>     - 增强矩阵雨效果<br>
-        <span class="cmd-echo">clear</span>      - 清除终端<br>
-        <span class="cmd-echo">sudo</span>       - 你确定？<br>
-        <span class="cmd-echo">exit</span>       - 离开终端
-      `;
-    } else if (cmd === 'whoami') {
-      result = '<span class="cyan">终末之剑</span> — 全栈开发者 / 开源贡献者 / 赛博朋克爱好者';
-    } else if (cmd === 'neofetch') {
+    if (!cmd) { result = ''; }
+    else if (cmd === 'help') {
+      result = '<span class="cyan">命令列表:</span><br><span class="cmd-echo">help</span> / <span class="cmd-echo">whoami</span> / <span class="cmd-echo">neofetch</span> / <span class="cmd-echo">ls</span> / <span class="cmd-echo">cat blog|about</span> / <span class="cmd-echo">date</span> / <span class="cmd-echo">theme g|c|m</span> / <span class="cmd-echo">matrix</span> / <span class="cmd-echo">clear</span> / <span class="cmd-echo">sudo</span> / <span class="cmd-echo">exit</span>';
+    } else if (cmd === 'whoami') { result = '<span class="cyan">终末之剑</span> — 全栈开发者 / 开源贡献者 / 赛博朋克爱好者'; }
+    else if (cmd === 'neofetch') {
       const d = new Date();
-      result = `
-        <span class="magenta">       ▄▄▄▄▄</span>   <span class="cyan">终末之剑</span>@<span class="cmd-echo">cyberblog</span><br>
-        <span class="magenta">    ▄▀▀     ▀▀▄</span>  OS: Cyberpunk 2077<br>
-        <span class="magenta">   █           █</span>  Kernel: NEUROMANCER-X<br>
-        <span class="magenta">  █  ▀▀▀▀▀▀▀▀▀  █</span>  Shell: cyber-bash 4.7<br>
-        <span class="magenta">  █ █▀▀     ▀▀█ █</span>  Uptime: ${Math.floor(Math.random() * 999)} days<br>
-        <span class="magenta">  █▀ ▀▀▀▀▀▀▀▀▀ ▀█</span>  Theme: ${document.documentElement.getAttribute('data-theme') || 'neon-green'}<br>
-        <span class="magenta">   ▀▄▄       ▄▄▀</span>   Time: ${d.toLocaleString('zh-CN')}<br>
-        <span class="magenta">      ▀▀▀▀▀▀▀▀▀</span>
-      `;
-    } else if (cmd === 'ls') {
-      result = 'blog/  about/  projects/  stats/  newsletter/  rss.xml';
-    } else if (cmd === 'cat blog') {
-      result = '正在跳转到博客板块...';
-      setTimeout(() => { document.getElementById('blog').scrollIntoView({ behavior: 'smooth' }); }, 300);
-    } else if (cmd === 'cat about') {
-      result = '正在跳转到关于板块...';
-      setTimeout(() => { document.getElementById('about').scrollIntoView({ behavior: 'smooth' }); }, 300);
-    } else if (cmd === 'date') {
-      result = new Date().toLocaleString('zh-CN');
-    } else if (cmd.startsWith('theme ')) {
-      const t = cmd.split(' ')[1];
-      const map = { g: 'green', c: 'cyan', m: 'magenta', green: 'green', cyan: 'cyan', magenta: 'magenta' };
-      const theme = map[t];
-      if (theme) {
-        if (theme === 'green') document.documentElement.removeAttribute('data-theme');
-        else document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('cyberblog-theme', theme);
-        document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active'));
-        const dot = document.querySelector(`.theme-dot.${theme}`);
-        if (dot) dot.classList.add('active');
-        result = `主题已切换为: ${theme}`;
-      } else {
-        result = '<span class="error">未知主题。可用: green, cyan, magenta</span>';
-      }
-    } else if (cmd === 'matrix') {
-      window._matrixIntensity = (window._matrixIntensity || 1) + 0.5;
-      const canvas = window._matrixCanvas;
-      if (canvas) canvas.style.opacity = Math.min(0.3, 0.12 * window._matrixIntensity);
-      result = `矩阵强度: ${Math.round(window._matrixIntensity * 100)}%`;
-    } else if (cmd === 'clear') {
-      el.innerHTML = '';
-      addTerminalPrompt();
-      return;
-    } else if (cmd === 'sudo') {
-      result = '<span class="error">Permission denied. 你不是 root。没有人是 root。</span>';
-    } else if (cmd === 'exit') {
-      result = 'Connection closed. 刷新页面重新连接。';
-    } else {
-      result = `<span class="error">命令未找到: ${escapeHtml(cmd)}。输入 help 查看可用命令。</span>`;
-    }
+      result = `<span class="magenta">      ▄▄▄▄▄</span>   <span class="cyan">终末之剑</span>@cyberblog<br><span class="magenta">   ▄▀▀     ▀▀▄</span>  OS: Cyberpunk 2077<br><span class="magenta">  █           █</span>  Shell: cyber-bash<br><span class="magenta"> █  ▀▀▀▀▀▀▀▀▀  █</span>  Time: ${d.toLocaleString('zh-CN')}<br><span class="magenta">  ▀▄▄       ▄▄▀</span>   Theme: ${document.documentElement.getAttribute('data-theme') || 'neon-green'}<br><span class="magenta">     ▀▀▀▀▀▀▀▀▀</span>`;
+    } else if (cmd === 'ls') { result = 'blog/  about/  projects/  stats/  guestbook/  rss.xml'; }
+    else if (cmd === 'cat blog') { result = '跳转到博客...'; setTimeout(() => document.getElementById('blog').scrollIntoView({ behavior: 'smooth' }), 300); }
+    else if (cmd === 'cat about') { result = '跳转到关于...'; setTimeout(() => document.getElementById('about').scrollIntoView({ behavior: 'smooth' }), 300); }
+    else if (cmd === 'date') { result = new Date().toLocaleString('zh-CN'); }
+    else if (cmd.startsWith('theme ')) {
+      const t = cmd.split(' ')[1]; const m = { g: 'green', c: 'cyan', m: 'magenta', green: 'green', cyan: 'cyan', magenta: 'magenta' };
+      const th = m[t];
+      if (th) { if (th === 'green') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', th); localStorage.setItem('cyberblog-theme', th); document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active')); const dot = document.querySelector(`.theme-dot.${th}`); if (dot) dot.classList.add('active'); result = `主题: ${th}`; }
+      else { result = '<span class="error">未知主题。可用: green, cyan, magenta</span>'; }
+    } else if (cmd === 'matrix') { window._matrixIntensity = (window._matrixIntensity || 1) + 0.5; if (window._matrixCanvas) window._matrixCanvas.style.opacity = Math.min(0.3, 0.12 * window._matrixIntensity); result = `矩阵强度: ${Math.round(window._matrixIntensity * 100)}%`; }
+    else if (cmd === 'clear') { el.innerHTML = ''; addPrompt(); return; }
+    else if (cmd === 'sudo') { result = '<span class="error">Permission denied. 你不是 root。</span>'; }
+    else if (cmd === 'exit') { result = 'Connection closed.'; }
+    else { result = `<span class="error">命令未找到: ${escHtml(cmd)}。输入 help 查看。</span>`; }
 
-    if (result) {
-      const resultEl = document.createElement('div');
-      resultEl.className = 'terminal-output-line';
-      resultEl.innerHTML = result;
-      el.appendChild(resultEl);
-    }
-
-    // Re-add input
-    addTerminalPrompt();
-    el.scrollTop = el.scrollHeight;
+    if (result) { const re = document.createElement('div'); re.className = 'terminal-output-line'; re.innerHTML = result; el.appendChild(re); }
+    addPrompt(); el.scrollTop = el.scrollHeight;
   }
 
-  function escapeHtml(s) {
-    const div = document.createElement('div');
-    div.textContent = s;
-    return div.innerHTML;
-  }
-
-  const cursor = document.createElement('span');
-  cursor.className = 'cursor';
-  el.appendChild(cursor);
+  const cur = document.createElement('span'); cur.className = 'cursor'; el.appendChild(cur);
   setTimeout(typeChar, 600);
 }
 
@@ -373,48 +251,153 @@ function initTypingEffect() {
 function initNavigation() {
   const nav = document.querySelector('.nav');
   const hamburger = document.querySelector('.hamburger');
-  const navLinks = document.querySelector('.nav-links');
-  const links = navLinks.querySelectorAll('a');
-  window.addEventListener('scroll', () => { nav.classList.toggle('scrolled', window.scrollY > 100); });
-  hamburger.addEventListener('click', () => navLinks.classList.toggle('open'));
-  links.forEach(l => l.addEventListener('click', () => navLinks.classList.remove('open')));
-  const sections = document.querySelectorAll('section[id]');
+  const nl = document.querySelector('.nav-links');
+  window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 100));
+  hamburger.addEventListener('click', () => nl.classList.toggle('open'));
+  nl.querySelectorAll('a').forEach(l => l.addEventListener('click', () => nl.classList.remove('open')));
+  const secs = document.querySelectorAll('section[id]');
   window.addEventListener('scroll', () => {
-    let current = '';
-    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 150) current = s.getAttribute('id'); });
-    links.forEach(l => { l.classList.remove('active'); if (l.getAttribute('href') === '#' + current) l.classList.add('active'); });
+    let cur = '';
+    secs.forEach(s => { if (window.scrollY >= s.offsetTop - 150) cur = s.getAttribute('id'); });
+    nl.querySelectorAll('a').forEach(l => { l.classList.remove('active'); if (l.getAttribute('href') === '#' + cur) l.classList.add('active'); });
   });
 }
 
 /* --- Scroll Effects --- */
 function initScrollEffects() {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  const obs = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }), { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
 }
 
 /* --- Reading Progress --- */
 function initReadingProgress() {
   const bar = document.getElementById('reading-progress');
-  window.addEventListener('scroll', () => {
-    const h = document.documentElement.scrollHeight - window.innerHeight;
-    bar.style.width = h > 0 ? (window.scrollY / h * 100) + '%' : '0%';
-  });
+  window.addEventListener('scroll', () => { const h = document.documentElement.scrollHeight - window.innerHeight; bar.style.width = h > 0 ? (window.scrollY / h * 100) + '%' : '0%'; });
 }
 
-/* --- Theme Switcher --- */
+/* --- Theme --- */
 function initThemeSwitcher() {
   const dots = document.querySelectorAll('.theme-dot');
   const saved = localStorage.getItem('cyberblog-theme') || 'green';
   if (saved !== 'green') document.documentElement.setAttribute('data-theme', saved);
-  updateDot(saved);
-  dots.forEach(d => { d.addEventListener('click', () => { const t = d.dataset.theme; if (t === 'green') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', t); localStorage.setItem('cyberblog-theme', t); updateDot(t); }); });
-  function updateDot(t) { dots.forEach(d => d.classList.remove('active')); const a = document.querySelector(`.theme-dot.${t}`); if (a) a.classList.add('active'); }
+  update(saved);
+  dots.forEach(d => d.addEventListener('click', () => { const t = d.dataset.theme; if (t === 'green') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', t); localStorage.setItem('cyberblog-theme', t); update(t); }));
+  function update(t) { dots.forEach(d => d.classList.remove('active')); const a = document.querySelector(`.theme-dot.${t}`); if (a) a.classList.add('active'); }
 }
 
 /* ============================================================
-   BLOG SECTION — enhanced
+   AUTH SYSTEM
+   ============================================================ */
+function initAuthUI() {
+  const area = document.getElementById('nav-auth-area');
+  let user = DB.getCurrentUser();
+  renderAuthArea();
+
+  function renderAuthArea() {
+    user = DB.getCurrentUser();
+    if (user) {
+      area.innerHTML = `
+        <div class="user-menu">
+          <div class="user-avatar">${user.username[0].toUpperCase()}</div>
+          <span class="user-name">${user.username}</span>
+          <div class="user-dropdown">
+            <a href="#" data-action="history">&#9776; 阅读记录</a>
+            <a href="#" data-action="likes">&#9825; 我的收藏</a>
+            <div class="divider"></div>
+            <a href="#" class="logout" data-action="logout">退出登录</a>
+          </div>
+        </div>
+      `;
+      const avatar = area.querySelector('.user-avatar');
+      const dropdown = area.querySelector('.user-dropdown');
+      avatar.addEventListener('click', e => { e.stopPropagation(); dropdown.classList.toggle('open'); });
+      document.addEventListener('click', () => dropdown.classList.remove('open'));
+      area.querySelector('[data-action="logout"]').addEventListener('click', e => { e.preventDefault(); DB.setCurrentUser(null); renderAuthArea(); showToast('已退出登录'); });
+      area.querySelector('[data-action="history"]').addEventListener('click', e => { e.preventDefault(); showReadingHistory(); dropdown.classList.remove('open'); });
+      area.querySelector('[data-action="likes"]').addEventListener('click', e => { e.preventDefault(); showMyLikes(); dropdown.classList.remove('open'); });
+    } else {
+      area.innerHTML = '<button class="btn btn-sm" id="btn-login">> 登录</button>';
+      document.getElementById('btn-login').addEventListener('click', openAuthModal);
+    }
+  }
+
+  // Auth Modal
+  const authModal = document.getElementById('auth-modal');
+  const authBody = document.getElementById('auth-body');
+  let isRegister = false;
+
+  function openAuthModal() {
+    isRegister = false;
+    updateAuthForm();
+    authModal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function updateAuthForm() {
+    document.getElementById('auth-title').textContent = isRegister ? '> REGISTER' : '> LOGIN';
+    document.getElementById('auth-email-field').style.display = isRegister ? 'block' : 'none';
+    document.getElementById('auth-confirm-field').style.display = isRegister ? 'block' : 'none';
+    document.getElementById('auth-submit').textContent = isRegister ? '注册' : '登录';
+    document.getElementById('auth-switch-text').textContent = isRegister ? '已有账号？' : '没有账号？';
+    document.getElementById('auth-switch').textContent = isRegister ? '登录' : '注册';
+    document.getElementById('auth-error').style.display = 'none';
+    document.getElementById('auth-form').reset();
+  }
+
+  document.getElementById('btn-login') && document.getElementById('btn-login').addEventListener('click', openAuthModal);
+  document.getElementById('auth-close').addEventListener('click', () => { authModal.classList.remove('open'); document.body.style.overflow = ''; });
+  authModal.addEventListener('click', e => { if (e.target === authModal) { authModal.classList.remove('open'); document.body.style.overflow = ''; } });
+  document.getElementById('auth-switch').addEventListener('click', e => { e.preventDefault(); isRegister = !isRegister; updateAuthForm(); });
+
+  document.getElementById('auth-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const username = document.getElementById('auth-username').value.trim();
+    const password = document.getElementById('auth-password').value;
+    const errEl = document.getElementById('auth-error');
+
+    if (!username || !password) { errEl.textContent = '请填写所有必填字段'; errEl.style.display = 'block'; return; }
+    if (username.length < 2) { errEl.textContent = '用户名至少 2 个字符'; errEl.style.display = 'block'; return; }
+    if (password.length < 4) { errEl.textContent = '密码至少 4 个字符'; errEl.style.display = 'block'; return; }
+
+    const users = DB.getUsers();
+
+    if (isRegister) {
+      const email = document.getElementById('auth-email').value.trim();
+      const confirm = document.getElementById('auth-confirm').value;
+      if (password !== confirm) { errEl.textContent = '两次密码不一致'; errEl.style.display = 'block'; return; }
+      if (users.find(u => u.username === username)) { errEl.textContent = '用户名已存在'; errEl.style.display = 'block'; return; }
+      const newUser = { id: Date.now(), username, email, password, createdAt: new Date().toISOString() };
+      users.push(newUser);
+      DB.saveUsers(users);
+      DB.setCurrentUser(newUser);
+      authModal.classList.remove('open');
+      document.body.style.overflow = '';
+      renderAuthArea();
+      showToast('注册成功！欢迎 ' + username);
+    } else {
+      const found = users.find(u => u.username === username && u.password === password);
+      if (!found) { errEl.textContent = '用户名或密码错误'; errEl.style.display = 'block'; return; }
+      DB.setCurrentUser(found);
+      authModal.classList.remove('open');
+      document.body.style.overflow = '';
+      renderAuthArea();
+      showToast('欢迎回来，' + username);
+    }
+  });
+
+  window._renderAuthArea = renderAuthArea;
+}
+
+function showToast(msg) {
+  const toast = document.createElement('div');
+  toast.style.cssText = `position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:20001;background:var(--bg-card);border:1px solid var(--neon-primary);border-radius:var(--radius-md);padding:12px 24px;font-family:var(--font-mono);font-size:0.82rem;color:var(--neon-primary);letter-spacing:0.06em;box-shadow:0 0 20px var(--border-glow);animation:fadeInUp 0.3s ease;`;
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 2500);
+}
+
+/* ============================================================
+   BLOG SECTION — Event Delegation (FIXED)
    ============================================================ */
 function initBlogSection() {
   const grid = document.getElementById('blog-grid');
@@ -424,8 +407,7 @@ function initBlogSection() {
   const modalBody = document.getElementById('modal-body');
   const modalClose = document.getElementById('modal-close');
 
-  let activeFilter = 'all', searchQuery = '';
-  const viewCounts = JSON.parse(localStorage.getItem('cyberblog-views') || '{}');
+  let activeFilter = 'all', searchQuery = '', currentPostId = null;
 
   function renderPosts() {
     let filtered = blogPosts;
@@ -436,75 +418,95 @@ function initBlogSection() {
     }
 
     if (filtered.length === 0) {
-      grid.innerHTML = '<div class="blog-empty">[!] NO RESULTS FOUND // 换个关键词试试...</div>';
+      grid.innerHTML = '<div class="blog-empty">[!] NO RESULTS FOUND</div>';
       return;
     }
 
     grid.innerHTML = filtered.map(post => {
-      const views = viewCounts[post.id] || post.views || 0;
+      const likes = DB.getLikes();
+      const postLikes = likes[post.id] || [];
       return `
         <article class="blog-card fade-in visible" data-post-id="${post.id}">
           <div class="card-sweep"></div>
           <div class="blog-card-header">
             <span class="blog-card-date">${post.date}</span>
-            <span class="blog-card-readtime">${post.readtime} · ${views} views</span>
+            <span class="blog-card-readtime">${post.readtime} · ${(post.views || 0) + postLikes.length} views</span>
           </div>
           <h3 class="blog-card-title">${post.title}</h3>
           <p class="blog-card-excerpt">${post.excerpt}</p>
-          <div class="blog-card-tags">
-            ${post.tags.map(t => `<span class="blog-card-tag">#${t}</span>`).join('')}
-          </div>
+          <div class="blog-card-tags">${post.tags.map(t => `<span class="blog-card-tag">#${t}</span>`).join('')}</div>
         </article>
       `;
     }).join('');
 
-    grid.querySelectorAll('.blog-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const id = parseInt(card.dataset.postId);
-        const post = blogPosts.find(p => p.id === id);
-        if (post) {
-          viewCounts[id] = (viewCounts[id] || 0) + 1;
-          localStorage.setItem('cyberblog-views', JSON.stringify(viewCounts));
-          openPostModal(post);
-          // Update view count on card
-          const vc = card.querySelector('.blog-card-readtime');
-          if (vc) vc.textContent = `${post.readtime} · ${viewCounts[id]} views`;
-        }
-      });
-    });
-
+    // Re-init tilt effects (NO CLONING)
     initCardTiltOnCards();
   }
 
+  // CRITICAL: Use event delegation for blog card clicks
+  grid.addEventListener('click', (e) => {
+    const card = e.target.closest('.blog-card');
+    if (!card) return;
+    const id = parseInt(card.dataset.postId);
+    const post = blogPosts.find(p => p.id === id);
+    if (post) openPostModal(post);
+  });
+
   function openPostModal(post) {
-    const views = JSON.parse(localStorage.getItem('cyberblog-views') || '{}')[post.id] || 0;
-    const tocHTML = generateTOC(post.content);
-    const contentWithCopy = addCopyButtons(post.content);
-    const relatedHTML = generateRelatedPosts(post);
+    currentPostId = post.id;
+
+    // Track reading history
+    const user = DB.getCurrentUser();
+    if (user) {
+      const history = DB.getReadingHistory();
+      const filtered = history.filter(h => h.postId !== post.id);
+      filtered.unshift({ postId: post.id, title: post.title, date: new Date().toISOString() });
+      DB.saveReadingHistory(filtered.slice(0, 20));
+    }
+
+    const views = Math.max(post.views || 0, ...[]);
+    const tocHTML = genTOC(post.content);
+    const contentWithCopy = addCopyBtns(post.content);
+    const relatedHTML = genRelated(post);
+    const commentsHTML = genComments(post.id);
+    const likes = DB.getLikes();
+    const postLikes = likes[post.id] || [];
+    const user = DB.getCurrentUser();
+    const isLiked = user ? postLikes.includes(user.id) : false;
 
     modalBody.innerHTML = `
-      <div class="post-meta"><span>${post.date}</span><span>${post.readtime}</span><span>${views} 次阅读</span><span>#${post.category}</span></div>
+      <div class="post-meta"><span>${post.date}</span><span>${post.readtime}</span><span>${views} 阅读</span><span>${postLikes.length} 喜欢</span><span>#${post.category}</span></div>
       <h2 class="post-title">${post.title}</h2>
       ${tocHTML}
       <div class="post-content">${contentWithCopy}</div>
+      <button class="like-btn ${isLiked ? 'liked' : ''}" id="like-btn" data-post-id="${post.id}">
+        <span class="like-icon">${isLiked ? '&#9829;' : '&#9825;'}</span>
+        <span id="like-count">${postLikes.length}</span> 喜欢
+      </button>
       <div class="post-tags">${post.tags.map(t => `<span class="filter-btn" style="pointer-events:none;">#${t}</span>`).join('')}</div>
-      ${relatedHTML}
       <div class="share-buttons">
         <button class="share-btn" data-action="copy-url">&#128279; 复制链接</button>
         <button class="share-btn" data-action="copy-title">&#128196; 复制标题</button>
       </div>
+      ${relatedHTML}
+      ${commentsHTML}
     `;
+
+    // Bind like button
+    const likeBtn = modalBody.querySelector('#like-btn');
+    if (likeBtn) {
+      likeBtn.addEventListener('click', () => toggleLike(post.id, likeBtn));
+    }
 
     // Bind share buttons
     modalBody.querySelectorAll('.share-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const action = btn.dataset.action;
-        if (action === 'copy-url') { navigator.clipboard.writeText(window.location.href).then(() => { btn.textContent = '已复制!'; setTimeout(() => btn.textContent = '复制链接', 1500); }); }
-        if (action === 'copy-title') { navigator.clipboard.writeText(post.title).then(() => { btn.textContent = '已复制!'; setTimeout(() => btn.textContent = '复制标题', 1500); }); }
+        if (btn.dataset.action === 'copy-url') { navigator.clipboard.writeText(window.location.href).then(() => { btn.textContent = '已复制!'; setTimeout(() => btn.textContent = '复制链接', 1500); }); }
+        if (btn.dataset.action === 'copy-title') { navigator.clipboard.writeText(post.title).then(() => { btn.textContent = '已复制!'; setTimeout(() => btn.textContent = '复制标题', 1500); }); }
       });
     });
 
-    // Bind related post clicks
+    // Bind related posts
     modalBody.querySelectorAll('.related-post-item').forEach(item => {
       item.addEventListener('click', () => {
         const rid = parseInt(item.dataset.postId);
@@ -513,7 +515,7 @@ function initBlogSection() {
       });
     });
 
-    // Bind copy buttons
+    // Bind copy code buttons
     modalBody.querySelectorAll('.copy-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const code = btn.parentElement.querySelector('pre').textContent;
@@ -521,83 +523,268 @@ function initBlogSection() {
       });
     });
 
+    // Bind comment form
+    const commentForm = modalBody.querySelector('#comment-form');
+    if (commentForm) {
+      commentForm.addEventListener('submit', e => {
+        e.preventDefault();
+        const user = DB.getCurrentUser();
+        if (!user) { showToast('请先登录后再评论'); return; }
+        const textarea = commentForm.querySelector('textarea');
+        const text = textarea.value.trim();
+        if (!text) return;
+        const comments = DB.getComments();
+        comments.push({ id: Date.now(), postId: post.id, userId: user.id, username: user.username, text, date: new Date().toISOString() });
+        DB.saveComments(comments);
+        textarea.value = '';
+        // Refresh comments
+        const commentsSection = modalBody.querySelector('.comments-section');
+        if (commentsSection) {
+          const newCommentsHTML = genCommentsContent(post.id);
+          commentsSection.innerHTML = newCommentsHTML;
+          bindCommentDelete(modalBody, post.id);
+        }
+      });
+    }
+
+    bindCommentDelete(modalBody, post.id);
+
     modalOverlay.classList.add('open');
     document.body.style.overflow = 'hidden';
   }
 
-  function closeModal() { modalOverlay.classList.remove('open'); document.body.style.overflow = ''; }
+  function closeModal() { modalOverlay.classList.remove('open'); document.body.style.overflow = ''; currentPostId = null; }
   modalClose.addEventListener('click', closeModal);
   modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
 
   searchInput.addEventListener('input', e => { searchQuery = e.target.value; renderPosts(); });
-  filterBtns.forEach(btn => { btn.addEventListener('click', () => { filterBtns.forEach(b => b.classList.remove('active')); btn.classList.add('active'); activeFilter = btn.dataset.filter; renderPosts(); }); });
+  filterBtns.forEach(btn => btn.addEventListener('click', () => { filterBtns.forEach(b => b.classList.remove('active')); btn.classList.add('active'); activeFilter = btn.dataset.filter; renderPosts(); }));
 
   renderPosts();
 }
 
-function generateTOC(content) {
-  const headingRegex = /<h2>(.*?)<\/h2>/g;
-  const headings = [];
-  let match;
-  while ((match = headingRegex.exec(content)) !== null) {
-    headings.push(match[1].replace(/<[^>]*>/g, ''));
-  }
-  if (headings.length === 0) return '';
-  return `
-    <div class="post-toc">
-      <div class="post-toc-title">> TABLE_OF_CONTENTS</div>
-      ${headings.map((h, i) => `<a href="#" data-toc="${i}">${h}</a>`).join('')}
-    </div>
-  `;
+function toggleLike(postId, btn) {
+  const user = DB.getCurrentUser();
+  if (!user) { showToast('请先登录后再点赞'); return; }
+  const likes = DB.getLikes();
+  if (!likes[postId]) likes[postId] = [];
+  const idx = likes[postId].indexOf(user.id);
+  if (idx === -1) { likes[postId].push(user.id); btn.classList.add('liked'); btn.querySelector('.like-icon').innerHTML = '&#9829;'; }
+  else { likes[postId].splice(idx, 1); btn.classList.remove('liked'); btn.querySelector('.like-icon').innerHTML = '&#9825;'; }
+  DB.saveLikes(likes);
+  const count = btn.querySelector('#like-count'); if (count) count.textContent = likes[postId].length;
 }
 
-function addCopyButtons(content) {
-  return content.replace(/(<pre>[\s\S]*?<\/pre>)/g, (match) => {
-    return `<div class="code-block-wrapper">${match}<button class="copy-btn">复制</button></div>`;
+/* --- TOC --- */
+function genTOC(content) {
+  const re = /<h2>(.*?)<\/h2>/g; const h = []; let m;
+  while ((m = re.exec(content)) !== null) h.push(m[1].replace(/<[^>]*>/g, ''));
+  if (h.length === 0) return '';
+  return `<div class="post-toc"><div class="post-toc-title">> TABLE_OF_CONTENTS</div>${h.map((t, i) => `<a href="#" data-toc="${i}">${t}</a>`).join('')}</div>`;
+}
+
+/* --- Copy Buttons --- */
+function addCopyBtns(content) {
+  return content.replace(/(<pre>[\s\S]*?<\/pre>)/g, m => `<div class="code-block-wrapper">${m}<button class="copy-btn">复制</button></div>`);
+}
+
+/* --- Related Posts --- */
+function genRelated(cur) {
+  const related = blogPosts.filter(p => p.id !== cur.id && p.tags.some(t => cur.tags.includes(t))).slice(0, 3);
+  const list = related.length ? related : blogPosts.filter(p => p.id !== cur.id).slice(0, 3);
+  if (!list.length) return '';
+  return `<div class="related-posts"><div class="related-posts-title">> RELATED_POSTS</div><div class="related-posts-list">${list.map(p => `<div class="related-post-item" data-post-id="${p.id}">${p.title} <span style="color:var(--text-muted);font-size:0.68rem;">${p.date}</span></div>`).join('')}</div></div>`;
+}
+
+/* --- Comments --- */
+function genComments(postId) {
+  const user = DB.getCurrentUser();
+  const formHTML = user
+    ? `<form id="comment-form" class="comment-form"><textarea placeholder="> 写下你的评论..." rows="2"></textarea><button type="submit" class="btn btn-sm btn-primary">发表</button></form>`
+    : '<p class="comment-login-hint">请<a href="#" id="comment-login-link">登录</a>后发表评论</p>';
+
+  return `<div class="comments-section"><div class="comments-title">> COMMENTS</div>${formHTML}<div class="comments-list">${genCommentsContent(postId)}</div></div>`;
+}
+
+function genCommentsContent(postId) {
+  const comments = DB.getComments().filter(c => c.postId === postId).sort((a, b) => new Date(b.date) - new Date(a.date));
+  if (!comments.length) return '<p style="color:var(--text-muted);font-size:0.78rem;text-align:center;padding:12px 0;">暂无评论，来说两句吧</p>';
+  const user = DB.getCurrentUser();
+  return comments.map(c => `
+    <div class="comment-item">
+      <div class="comment-header">
+        <span class="comment-author">${c.username}</span>
+        <span>${new Date(c.date).toLocaleDateString('zh-CN')}${user && user.id === c.userId ? `<span class="comment-delete" data-comment-id="${c.id}">删除</span>` : ''}</span>
+      </div>
+      <div class="comment-body">${c.text}</div>
+    </div>
+  `).join('');
+}
+
+function bindCommentDelete(container, postId) {
+  container.querySelectorAll('.comment-delete').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cid = parseInt(btn.dataset.commentId);
+      const comments = DB.getComments().filter(c => !(c.id === cid));
+      DB.saveComments(comments);
+      const list = container.querySelector('.comments-list');
+      if (list) { list.innerHTML = genCommentsContent(postId); bindCommentDelete(container, postId); }
+      const section = container.querySelector('.comments-section');
+      if (section && document.getElementById('comment-form')) {
+        // Re-bind the fresh comment form
+      }
+    });
   });
-}
 
-function generateRelatedPosts(currentPost) {
-  const related = blogPosts.filter(p => p.id !== currentPost.id && p.tags.some(t => currentPost.tags.includes(t))).slice(0, 3);
-  if (related.length === 0) {
-    // Fallback: just show other recent posts
-    const others = blogPosts.filter(p => p.id !== currentPost.id).slice(0, 3);
-    if (others.length === 0) return '';
-    return `
-      <div class="related-posts">
-        <div class="related-posts-title">> RELATED_POSTS</div>
-        <div class="related-posts-list">
-          ${others.map(p => `<div class="related-post-item" data-post-id="${p.id}">${p.title} <span style="color:var(--text-muted);font-size:0.7rem;">${p.date}</span></div>`).join('')}
-        </div>
-      </div>
-    `;
+  // Login link in comments
+  const loginLink = container.querySelector('#comment-login-link');
+  if (loginLink) {
+    loginLink.addEventListener('click', e => { e.preventDefault(); document.getElementById('post-modal').classList.remove('open'); document.body.style.overflow = ''; document.getElementById('btn-login') && document.getElementById('btn-login').click(); });
   }
-  return `
-    <div class="related-posts">
-      <div class="related-posts-title">> RELATED_POSTS</div>
-      <div class="related-posts-list">
-        ${related.map(p => `<div class="related-post-item" data-post-id="${p.id}">${p.title} <span style="color:var(--text-muted);font-size:0.7rem;">${p.date}</span></div>`).join('')}
-      </div>
-    </div>
-  `;
 }
 
-/* --- 3D Card Tilt --- */
+/* --- 3D Card Tilt — FIXED: no cloneNode --- */
 function initCardTilt() { initCardTiltOnCards(); }
 function initCardTiltOnCards() {
   document.querySelectorAll('.blog-card, .project-card').forEach(card => {
-    const clone = card.cloneNode(true);
-    card.parentNode.replaceChild(clone, card);
-    clone.addEventListener('mousemove', (e) => {
-      const rect = clone.getBoundingClientRect();
+    if (card.dataset.tiltBound) return; // Prevent double-binding
+    card.dataset.tiltBound = '1';
+
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
       const x = e.clientX - rect.left, y = e.clientY - rect.top;
       const cx = rect.width / 2, cy = rect.height / 2;
       const rx = (y - cy) / cy * -8, ry = (x - cx) / cx * 8;
-      clone.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-6px)`;
-      clone.style.boxShadow = `${-ry}px ${-rx * 0.5}px 30px rgba(0,255,65,0.12), 0 0 20px rgba(0,255,65,0.08)`;
+      card.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-6px)`;
+      card.style.boxShadow = `${-ry}px ${-rx * 0.5}px 30px rgba(0,255,65,0.12), 0 0 20px rgba(0,255,65,0.08)`;
     });
-    clone.addEventListener('mouseleave', () => { clone.style.transform = ''; clone.style.boxShadow = ''; });
+
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+      card.style.boxShadow = '';
+    });
   });
+}
+
+/* ============================================================
+   GUESTBOOK
+   ============================================================ */
+function initGuestbook() {
+  const form = document.getElementById('gb-submit');
+  const messagesEl = document.getElementById('gb-messages');
+  const hint = document.getElementById('gb-login-hint');
+  if (!form) return;
+
+  renderMessages();
+
+  form.addEventListener('click', () => {
+    const user = DB.getCurrentUser();
+    if (!user) { hint.style.display = 'block'; return; }
+    hint.style.display = 'none';
+    const textEl = document.getElementById('gb-message');
+    const authorEl = document.getElementById('gb-author');
+    const text = textEl.value.trim();
+    const author = authorEl.value.trim() || user.username;
+    if (!text) return;
+    const messages = DB.getMessages();
+    messages.unshift({ id: Date.now(), userId: user.id, author, text, date: new Date().toISOString() });
+    DB.saveMessages(messages);
+    textEl.value = '';
+    renderMessages();
+  });
+
+  function renderMessages() {
+    const messages = DB.getMessages();
+    if (!messages.length) { messagesEl.innerHTML = '<div class="gb-empty">[!] 暂无留言，来做第一个留言的人吧</div>'; return; }
+    messagesEl.innerHTML = messages.map(m => `
+      <div class="gb-message-item">
+        <div class="gb-message-header"><span class="gb-message-author">> ${m.author}</span><span class="gb-message-date">${new Date(m.date).toLocaleDateString('zh-CN')}</span></div>
+        <div class="gb-message-text">${m.text}</div>
+      </div>
+    `).join('');
+  }
+}
+
+/* --- Reading History Modal --- */
+function showReadingHistory() {
+  const history = DB.getReadingHistory();
+  const modal = document.getElementById('post-modal');
+  const body = document.getElementById('modal-body');
+
+  if (!history.length) {
+    body.innerHTML = '<h2 class="post-title">阅读记录</h2><p style="color:var(--text-muted);">暂无阅读记录</p>';
+  } else {
+    body.innerHTML = `<h2 class="post-title">阅读记录 (${history.length})</h2><div class="related-posts-list">${history.map(h => {
+      const post = blogPosts.find(p => p.id === h.postId);
+      return post ? `<div class="related-post-item" data-post-id="${h.postId}">${h.title} <span style="color:var(--text-muted);font-size:0.68rem;">${new Date(h.date).toLocaleDateString('zh-CN')}</span></div>` : '';
+    }).join('')}</div>`;
+    body.querySelectorAll('.related-post-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const pid = parseInt(item.dataset.postId);
+        const post = blogPosts.find(p => p.id === pid);
+        if (post) {
+          modal.classList.remove('open');
+          document.body.style.overflow = '';
+          // Re-open with the selected post
+          setTimeout(() => {
+            const grid = document.getElementById('blog-grid');
+            document.getElementById('blog').scrollIntoView({ behavior: 'smooth' });
+          }, 300);
+        }
+      });
+    });
+  }
+  modal.querySelector('#modal-close') && modal.querySelector('#modal-close').click === undefined || true;
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+/* --- My Likes --- */
+function showMyLikes() {
+  const user = DB.getCurrentUser();
+  if (!user) return;
+  const likes = DB.getLikes();
+  const likedIds = Object.entries(likes).filter(([, users]) => users.includes(user.id)).map(([pid]) => parseInt(pid));
+  const likedPosts = blogPosts.filter(p => likedIds.includes(p.id));
+
+  const modal = document.getElementById('post-modal');
+  const body = document.getElementById('modal-body');
+  if (!likedPosts.length) {
+    body.innerHTML = '<h2 class="post-title">我的收藏</h2><p style="color:var(--text-muted);">你还没有收藏任何文章</p>';
+  } else {
+    body.innerHTML = `<h2 class="post-title">我的收藏 (${likedPosts.length})</h2><div class="related-posts-list">${likedPosts.map(p => `<div class="related-post-item" data-post-id="${p.id}">${p.title} <span style="color:var(--text-muted);font-size:0.68rem;">${p.date}</span></div>`).join('')}</div>`;
+    body.querySelectorAll('.related-post-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const pid = parseInt(item.dataset.postId);
+        const post = blogPosts.find(p => p.id === pid);
+        if (post) {
+          modal.classList.remove('open');
+          document.body.style.overflow = '';
+          setTimeout(() => { const blogEl = document.getElementById('blog'); blogEl.scrollIntoView({ behavior: 'smooth' }); }, 200);
+        }
+      });
+    });
+  }
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+/* ============================================================
+   GLOBAL MODALS (close with Esc, etc.)
+   ============================================================ */
+function initGlobalModals() {
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.open').forEach(m => { m.classList.remove('open'); });
+      document.body.style.overflow = '';
+    }
+  });
+
+  // Close post modal on X
+  const pmClose = document.getElementById('modal-close');
+  if (pmClose) pmClose.addEventListener('click', () => { document.getElementById('post-modal').classList.remove('open'); document.body.style.overflow = ''; });
+  const pmOverlay = document.getElementById('post-modal');
+  if (pmOverlay) pmOverlay.addEventListener('click', e => { if (e.target === pmOverlay) { pmOverlay.classList.remove('open'); document.body.style.overflow = ''; } });
 }
 
 /* --- Newsletter --- */
@@ -608,13 +795,8 @@ function initNewsletter() {
   form.addEventListener('submit', e => {
     e.preventDefault();
     const email = input.value.trim();
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      input.style.borderColor = 'var(--neon-red)'; input.style.boxShadow = '0 0 15px rgba(255,51,51,0.3)';
-      setTimeout(() => { input.style.borderColor = ''; input.style.boxShadow = ''; }, 1500);
-      return;
-    }
-    input.value = ''; success.classList.add('show');
-    setTimeout(() => success.classList.remove('show'), 4000);
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { input.style.borderColor = 'var(--neon-red)'; input.style.boxShadow = '0 0 15px rgba(255,51,51,0.3)'; setTimeout(() => { input.style.borderColor = ''; input.style.boxShadow = ''; }, 1500); return; }
+    input.value = ''; success.classList.add('show'); setTimeout(() => success.classList.remove('show'), 4000);
   });
 }
 
@@ -624,12 +806,7 @@ function initBackToTop() {
   const ring = document.getElementById('scroll-ring');
   window.addEventListener('scroll', () => {
     btn.classList.toggle('visible', window.scrollY > 600);
-    if (ring) {
-      const progress = Math.min(1, window.scrollY / (document.documentElement.scrollHeight - window.innerHeight));
-      const circumference = 50;
-      ring.style.strokeDashoffset = circumference - progress * circumference;
-      ring.style.stroke = 'var(--neon-primary)';
-    }
+    if (ring) { const p = Math.min(1, window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)); ring.style.strokeDashoffset = 50 - p * 50; ring.style.stroke = 'var(--neon-primary)'; }
   });
   btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 }
@@ -637,196 +814,103 @@ function initBackToTop() {
 /* --- Smooth Scroll --- */
 function initSmoothScroll() {
   document.querySelectorAll('a[href^="#"]').forEach(link => {
-    link.addEventListener('click', e => {
-      const target = document.querySelector(link.getAttribute('href'));
-      if (target) { e.preventDefault(); window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' }); }
-    });
+    link.addEventListener('click', e => { const t = document.querySelector(link.getAttribute('href')); if (t) { e.preventDefault(); window.scrollTo({ top: t.offsetTop - 80, behavior: 'smooth' }); } });
   });
 }
 
 /* --- Glitch Flash --- */
 function initGlitchFlash() {
-  const flash = document.createElement('div');
-  flash.className = 'glitch-flash';
-  document.body.appendChild(flash);
-  function trigger() { flash.classList.add('active'); setTimeout(() => flash.classList.remove('active'), 150); setTimeout(trigger, Math.random() * 8000 + 4000); }
-  setTimeout(trigger, 5000);
+  const flash = document.createElement('div'); flash.className = 'glitch-flash'; document.body.appendChild(flash);
+  function t() { flash.classList.add('active'); setTimeout(() => flash.classList.remove('active'), 150); setTimeout(t, Math.random() * 8000 + 4000); }
+  setTimeout(t, 6000);
 }
 
 /* --- Particles --- */
 function initParticles() {
-  const container = document.createElement('div');
-  container.style.cssText = 'position:fixed;inset:0;z-index:9996;pointer-events:none;';
-  document.body.appendChild(container);
-  const particles = [];
+  const c = document.createElement('div'); c.style.cssText = 'position:fixed;inset:0;z-index:9996;pointer-events:none;'; document.body.appendChild(c);
+  const ps = [];
   for (let i = 0; i < 25; i++) {
     const el = document.createElement('div');
     el.style.cssText = `position:absolute;width:${Math.random()*2+1}px;height:${Math.random()*2+1}px;background:var(--neon-primary);border-radius:50%;left:${Math.random()*100}%;top:${Math.random()*100}%;box-shadow:0 0 ${Math.random()*6+2}px var(--neon-primary);`;
-    container.appendChild(el);
-    particles.push({ el, x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight, vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4 });
+    c.appendChild(el);
+    ps.push({ el, x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight, vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4 });
   }
-  function animate() {
-    for (const p of particles) {
-      p.x += p.vx; p.y += p.vy;
-      if (p.x < 0) p.x = window.innerWidth; if (p.x > window.innerWidth) p.x = 0;
-      if (p.y < 0) p.y = window.innerHeight; if (p.y > window.innerHeight) p.y = 0;
-      if (Math.random() < 0.005) { p.vx = (Math.random() - 0.5) * 0.4; p.vy = (Math.random() - 0.5) * 0.4; }
-      p.el.style.transform = `translate(${p.x}px, ${p.y}px)`;
-    }
-    requestAnimationFrame(animate);
-  }
-  animate();
+  function a() { for (const p of ps) { p.x += p.vx; p.y += p.vy; if (p.x < 0) p.x = window.innerWidth; if (p.x > window.innerWidth) p.x = 0; if (p.y < 0) p.y = window.innerHeight; if (p.y > window.innerHeight) p.y = 0; if (Math.random() < 0.005) { p.vx = (Math.random() - 0.5) * 0.4; p.vy = (Math.random() - 0.5) * 0.4; } p.el.style.transform = `translate(${p.x}px, ${p.y}px)`; } requestAnimationFrame(a); }
+  a();
 }
 
 /* --- Live Clock --- */
 function initLiveClock() {
-  const clock = document.getElementById('live-clock');
-  if (!clock) return;
-  function tick() {
-    const now = new Date();
-    const utc8 = new Date(now.getTime() + (8 - now.getTimezoneOffset() / 60) * 3600000);
-    clock.textContent = `[${utc8.toISOString().replace('T', ' | ').slice(0, 19)} UTC+8]`;
-  }
-  tick(); setInterval(tick, 1000);
+  const clock = document.getElementById('live-clock'); if (!clock) return;
+  function t() { const n = new Date(); clock.textContent = `[${n.toISOString().replace('T', ' | ').slice(0, 19)} UTC+8]`; }
+  t(); setInterval(t, 1000);
 }
 
 /* --- Stats Counter --- */
 function initStatsCounter() {
-  const cards = document.querySelectorAll('.stat-number');
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const el = entry.target;
-        const target = parseInt(el.dataset.target);
-        animateCounter(el, target);
-        observer.unobserve(el);
-      }
-    });
-  }, { threshold: 0.5 });
-  cards.forEach(c => observer.observe(c));
+  document.querySelectorAll('.stat-number').forEach(el => {
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { const t = parseInt(el.dataset.target); animateNum(el, t); obs.unobserve(el); } });
+    }, { threshold: 0.5 });
+    obs.observe(el);
+  });
 }
 
-function animateCounter(el, target) {
-  const duration = 2000 + Math.random() * 1000;
-  const start = performance.now();
-  function update(now) {
-    const elapsed = now - start;
-    const progress = Math.min(1, elapsed / duration);
-    const eased = 1 - Math.pow(1 - progress, 3);
-    el.textContent = Math.floor(eased * target).toLocaleString();
-    if (progress < 1) requestAnimationFrame(update);
-    else el.textContent = target.toLocaleString();
-  }
-  requestAnimationFrame(update);
+function animateNum(el, target) {
+  const dur = 2000 + Math.random() * 1000; const start = performance.now();
+  function upd(now) { const p = Math.min(1, (now - start) / dur); const e = 1 - Math.pow(1 - p, 3); el.textContent = Math.floor(e * target).toLocaleString(); if (p < 1) requestAnimationFrame(upd); else el.textContent = target.toLocaleString(); }
+  requestAnimationFrame(upd);
 }
 
 /* --- Keyboard Shortcuts --- */
 function initKeyboardShortcuts() {
   const kbModal = document.getElementById('kb-modal');
-  const kbClose = document.getElementById('kb-close');
-
-  kbClose.addEventListener('click', () => { kbModal.classList.remove('open'); });
+  document.getElementById('kb-close').addEventListener('click', () => kbModal.classList.remove('open'));
   kbModal.addEventListener('click', e => { if (e.target === kbModal) kbModal.classList.remove('open'); });
-
-  document.addEventListener('keydown', (e) => {
-    // Don't trigger when typing in inputs
+  document.addEventListener('keydown', e => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
-    const key = e.key.toLowerCase();
-
-    if (key === '?') {
-      e.preventDefault();
-      kbModal.classList.toggle('open');
-    } else if (key === 'escape') {
-      // Close modals
-      document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
-      document.body.style.overflow = '';
-    } else if (key === '1') { window.scrollTo({ top: document.getElementById('home').offsetTop - 80, behavior: 'smooth' }); }
-    else if (key === '2') { window.scrollTo({ top: document.getElementById('blog').offsetTop - 80, behavior: 'smooth' }); }
-    else if (key === '3') { window.scrollTo({ top: document.getElementById('about').offsetTop - 80, behavior: 'smooth' }); }
-    else if (key === '4') { window.scrollTo({ top: document.getElementById('projects').offsetTop - 80, behavior: 'smooth' }); }
-    else if (key === 't') {
-      // Cycle theme
-      const themes = ['green', 'cyan', 'magenta'];
-      const current = localStorage.getItem('cyberblog-theme') || 'green';
-      const idx = (themes.indexOf(current) + 1) % themes.length;
-      const next = themes[idx];
-      if (next === 'green') document.documentElement.removeAttribute('data-theme');
-      else document.documentElement.setAttribute('data-theme', next);
+    const k = e.key.toLowerCase();
+    if (k === '?') { e.preventDefault(); kbModal.classList.toggle('open'); }
+    else if (k === 'g') window.scrollTo({ top: 0, behavior: 'smooth' });
+    else if (k === 't') {
+      const themes = ['green', 'cyan', 'magenta']; const cur = localStorage.getItem('cyberblog-theme') || 'green';
+      const next = themes[(themes.indexOf(cur) + 1) % themes.length];
+      if (next === 'green') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', next);
       localStorage.setItem('cyberblog-theme', next);
       document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active'));
-      const dot = document.querySelector(`.theme-dot.${next}`);
-      if (dot) dot.classList.add('active');
-    } else if (key === 'g') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const dot = document.querySelector(`.theme-dot.${next}`); if (dot) dot.classList.add('active');
+    }
+    else if (k >= '1' && k <= '5') {
+      const sections = ['home', 'blog', 'about', 'projects', 'guestbook'];
+      const idx = parseInt(k) - 1; if (sections[idx]) { const s = document.getElementById(sections[idx]); if (s) s.scrollIntoView({ behavior: 'smooth' }); }
+    }
+    else if (k === 'l' && document.getElementById('post-modal').classList.contains('open')) {
+      const likeBtn = document.getElementById('like-btn'); if (likeBtn) likeBtn.click();
     }
   });
 }
 
 /* --- Konami Code --- */
 function initKonamiCode() {
-  const konami = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a'];
+  const code = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a'];
   let pos = 0;
-  document.addEventListener('keydown', (e) => {
-    const expected = konami[pos];
-    if (e.key.toLowerCase() === expected) {
-      pos++;
-      if (pos === konami.length) {
-        pos = 0;
-        triggerEasterEgg();
-      }
-    } else {
-      pos = 0;
-    }
+  document.addEventListener('keydown', e => {
+    if (e.key.toLowerCase() === code[pos]) { pos++; if (pos === code.length) { pos = 0; triggerEgg(); } }
+    else pos = 0;
   });
 }
 
-function triggerEasterEgg() {
-  const toast = document.createElement('div');
-  toast.className = 'easter-egg-toast';
-  toast.textContent = '>>> CYBERPUNK MODE ACTIVATED <<<';
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 3000);
-
-  // Flash the background
-  document.body.style.transition = 'background 0.2s';
-  document.body.style.background = '#ff00ff';
-  setTimeout(() => document.body.style.background = '', 200);
+function triggerEgg() {
+  const t = document.createElement('div'); t.className = 'easter-egg-toast'; t.textContent = '>>> CYBERPUNK MODE ACTIVATED <<<'; document.body.appendChild(t); setTimeout(() => t.remove(), 3000);
+  document.body.style.transition = 'background 0.2s'; document.body.style.background = '#ff00ff'; setTimeout(() => document.body.style.background = '', 200);
 }
 
 /* --- RSS --- */
 function initRSS() {
-  document.querySelectorAll('#rss-link, #rss-footer').forEach(el => {
-    el.addEventListener('click', (e) => {
-      e.preventDefault();
-      generateRSS();
-    });
-  });
-}
-
-function generateRSS() {
-  const items = blogPosts.map(p => `
-    <item>
-      <title><![CDATA[${p.title}]]></title>
-      <link>${window.location.origin}${window.location.pathname}?post=${p.id}</link>
-      <description><![CDATA[${p.excerpt}]]></description>
-      <pubDate>${new Date(p.date).toUTCString()}</pubDate>
-      <category>${p.category}</category>
-    </item>
-  `).join('');
-
-  const rss = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
-  <channel>
-    <title>终末之剑 | CYBER//BLOG</title>
-    <link>${window.location.origin}${window.location.pathname}</link>
-    <description>赛博朋克风格个人技术博客</description>
-    <language>zh-CN</language>
-    ${items}
-  </channel>
-</rss>`;
-
-  const blob = new Blob([rss], { type: 'application/rss+xml' });
-  const url = URL.createObjectURL(blob);
-  window.open(url, '_blank');
+  document.querySelectorAll('#rss-link, #rss-footer').forEach(el => el.addEventListener('click', e => {
+    e.preventDefault();
+    const items = blogPosts.map(p => `<item><title><![CDATA[${p.title}]]></title><link>${location.origin}${location.pathname}?post=${p.id}</link><description><![CDATA[${p.excerpt}]]></description><pubDate>${new Date(p.date).toUTCString()}</pubDate></item>`).join('');
+    const rss = `<?xml version="1.0"?><rss version="2.0"><channel><title>终末之剑 | CYBER//BLOG</title><link>${location.origin}${location.pathname}</link><description>赛博朋克个人博客</description><language>zh-CN</language>${items}</channel></rss>`;
+    const blob = new Blob([rss], { type: 'application/rss+xml' }); window.open(URL.createObjectURL(blob), '_blank');
+  }));
 }

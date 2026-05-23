@@ -3,26 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="终末之剑的赛博朋克数字空间 — 技术、设计与代码">
+  <meta name="description" content="终末之剑的赛博朋克数字空间">
   <meta name="theme-color" content="#060608">
   <title>终末之剑 | CYBER//BLOG</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-  <!-- ============================================================
-       LOADING BOOT SEQUENCE
-       ============================================================ -->
-  <div id="boot-screen">
-    <div class="boot-log" id="boot-log"></div>
-  </div>
+  <!-- Boot Screen -->
+  <div id="boot-screen"><div class="boot-log" id="boot-log"></div></div>
 
-  <!-- ============================================================
-       READING PROGRESS
-       ============================================================ -->
+  <!-- Reading Progress -->
   <div id="reading-progress"></div>
 
-  <!-- Ambient Layers -->
+  <!-- Ambient -->
   <div class="vignette"></div>
 
   <!-- ============================================================
@@ -33,13 +27,13 @@
       <a href="#home" class="nav-logo">
         <span class="glitch-text" data-text="CYBER//BLOG">CYBER//BLOG</span>
       </a>
-
       <ul class="nav-links">
         <li><a href="#home" class="active">Home</a></li>
         <li><a href="#blog">Blog</a></li>
         <li><a href="#about">About</a></li>
         <li><a href="#projects">Projects</a></li>
         <li><a href="#stats">Stats</a></li>
+        <li><a href="#guestbook">Guestbook</a></li>
         <li>
           <div class="theme-switcher">
             <span class="theme-dot green active" data-theme="green" title="Neon Green"></span>
@@ -47,11 +41,11 @@
             <span class="theme-dot magenta" data-theme="magenta" title="Neon Magenta"></span>
           </div>
         </li>
+        <li id="nav-auth-area">
+          <button class="btn btn-sm" id="btn-login">> 登录</button>
+        </li>
       </ul>
-
-      <button class="hamburger" aria-label="Menu">
-        <span></span><span></span><span></span>
-      </button>
+      <button class="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
     </div>
   </nav>
 
@@ -72,11 +66,9 @@
         <div class="terminal-body" id="terminal-body">
           <div id="typing-text"></div>
           <div id="terminal-post-content">
-            <div style="margin-top: 24px;">
+            <div style="margin-top:24px;">
               <div class="glitch-title" data-text="终末之剑">终末之剑</div>
-              <p class="hero-subtitle">
-                全栈开发者 · 开源贡献者 · <span class="highlight">赛博朋克爱好者</span>
-              </p>
+              <p class="hero-subtitle">全栈开发者 · 开源贡献者 · <span class="highlight">赛博朋克爱好者</span></p>
               <div class="hero-cta">
                 <a href="#blog" class="btn btn-primary">> 浏览文章</a>
                 <a href="#about" class="btn">> 关于我</a>
@@ -98,7 +90,6 @@
         <h2 class="section-title">Blog Posts</h2>
         <div class="section-line"></div>
       </div>
-
       <div class="blog-controls fade-in">
         <div class="blog-search">
           <input type="text" id="blog-search-input" placeholder="> search articles...">
@@ -110,18 +101,12 @@
           <button class="filter-btn" data-filter="design">设计</button>
         </div>
       </div>
-
-      <div id="blog-grid" class="blog-grid">
-        <!-- Rendered by JS -->
-      </div>
+      <div id="blog-grid" class="blog-grid"><!-- JS render --></div>
+      <div class="pagination" id="blog-pagination" style="display:none;"></div>
     </div>
   </section>
 
-  <div class="deco-divider fade-in">
-    <div class="line-h"></div>
-    <div class="diamond"></div>
-    <div class="line-h"></div>
-  </div>
+  <div class="deco-divider fade-in"><div class="line-h"></div><div class="diamond"></div><div class="line-h"></div></div>
 
   <!-- ============================================================
        ABOUT
@@ -133,12 +118,9 @@
         <h2 class="section-title">About Me</h2>
         <div class="section-line"></div>
       </div>
-
       <div class="about-grid fade-in">
         <div class="about-avatar-wrapper">
-          <div class="about-avatar">
-            <span class="avatar-placeholder">&#9763;</span>
-          </div>
+          <div class="about-avatar"><span class="avatar-placeholder">&#9763;</span></div>
           <div class="social-links">
             <a href="https://github.com" target="_blank" rel="noopener" class="social-link" title="GitHub">GH</a>
             <a href="https://twitter.com" target="_blank" rel="noopener" class="social-link" title="Twitter">TW</a>
@@ -146,47 +128,21 @@
             <a href="#" class="social-link" title="RSS" id="rss-link">RS</a>
           </div>
         </div>
-
         <div class="about-text">
           <h3>&gt; whoami</h3>
-          <p>
-            你好，我是 <strong>终末之剑</strong>，一名热爱技术的全栈开发者。我相信代码不仅是一种工具，更是一种自我表达的方式。从 Web 开发到系统编程，从 UI 设计到性能优化——我对技术的每一个层面都充满好奇。
-          </p>
-          <p>
-            这个博客是我在数字世界的一片自留地。在这里我分享技术心得、设计思考和职业感悟。不追求流量和 SEO，只追求真诚和深度。
-          </p>
-          <p>
-            当我不在写代码的时候，你可能会发现我在看科幻小说、玩独立游戏，或者在深夜的城市街道上散步——寻找下一个赛博朋克的灵感。
-          </p>
-
-          <h3 style="margin-top: 28px;">&gt; ls skills/</h3>
+          <p>你好，我是 <strong>终末之剑</strong>，一名热爱技术的全栈开发者。我相信代码不仅是一种工具，更是一种自我表达的方式。从 Web 开发到系统编程，从 UI 设计到性能优化——我对技术的每一个层面都充满好奇。</p>
+          <p>这个博客是我在数字世界的一片自留地。在这里我分享技术心得、设计思考和职业感悟。</p>
+          <p>不写代码时，你可能会发现我在看科幻小说、玩独立游戏，或深夜在城市街道上散步——寻找下一个赛博朋克灵感。</p>
+          <h3 style="margin-top:28px;">&gt; ls skills/</h3>
           <div class="skills">
-            <span class="skill-tag">JavaScript</span>
-            <span class="skill-tag">TypeScript</span>
-            <span class="skill-tag">React</span>
-            <span class="skill-tag">Vue</span>
-            <span class="skill-tag">Node.js</span>
-            <span class="skill-tag">Python</span>
-            <span class="skill-tag">Go</span>
-            <span class="skill-tag">PostgreSQL</span>
-            <span class="skill-tag">Redis</span>
-            <span class="skill-tag">Docker</span>
-            <span class="skill-tag">AWS</span>
-            <span class="skill-tag">Linux</span>
-            <span class="skill-tag">Git</span>
-            <span class="skill-tag">CSS/SCSS</span>
-            <span class="skill-tag">Figma</span>
+            <span class="skill-tag">JavaScript</span><span class="skill-tag">TypeScript</span><span class="skill-tag">React</span><span class="skill-tag">Vue</span><span class="skill-tag">Node.js</span><span class="skill-tag">Python</span><span class="skill-tag">Go</span><span class="skill-tag">PostgreSQL</span><span class="skill-tag">Redis</span><span class="skill-tag">Docker</span><span class="skill-tag">AWS</span><span class="skill-tag">Linux</span><span class="skill-tag">Git</span><span class="skill-tag">CSS/SCSS</span><span class="skill-tag">Figma</span>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <div class="deco-divider fade-in">
-    <div class="line-h"></div>
-    <div class="diamond"></div>
-    <div class="line-h"></div>
-  </div>
+  <div class="deco-divider fade-in"><div class="line-h"></div><div class="diamond"></div><div class="line-h"></div></div>
 
   <!-- ============================================================
        PROJECTS
@@ -198,70 +154,19 @@
         <h2 class="section-title">Projects</h2>
         <div class="section-line"></div>
       </div>
-
       <div class="projects-grid">
-        <div class="project-card fade-in">
-          <div class="project-icon">&#9881;</div>
-          <h3 class="project-name">CyberDashboard</h3>
-          <p class="project-desc">一套开源的系统监控面板，赛博朋克风格的实时数据可视化。支持 CPU、内存、网络等指标的 Terminal UI。</p>
-          <div class="project-tech">
-            <span>TypeScript</span><span>Node.js</span><span>WebSocket</span><span>Canvas</span>
-          </div>
-          <div class="project-links">
-            <a href="#" target="_blank" rel="noopener">&#8599; GitHub</a>
-            <a href="#" target="_blank" rel="noopener">&#8599; Demo</a>
-          </div>
-        </div>
-
-        <div class="project-card fade-in">
-          <div class="project-icon">&#9760;</div>
-          <h3 class="project-name">NeonUI</h3>
-          <p class="project-desc">轻量级赛博朋克风格 UI 组件库，包含按钮、卡片、输入框、模态框等常用组件，支持主题定制。</p>
-          <div class="project-tech">
-            <span>CSS</span><span>Web Components</span><span>Storybook</span>
-          </div>
-          <div class="project-links">
-            <a href="#" target="_blank" rel="noopener">&#8599; GitHub</a>
-            <a href="#" target="_blank" rel="noopener">&#8599; Docs</a>
-          </div>
-        </div>
-
-        <div class="project-card fade-in">
-          <div class="project-icon">&#9762;</div>
-          <h3 class="project-name">PixelForge</h3>
-          <p class="project-desc">浏览器端的像素画编辑器，支持图层、调色板、动画帧编辑和导出。使用 Canvas API 和 Web Workers 实现。</p>
-          <div class="project-tech">
-            <span>JavaScript</span><span>Canvas</span><span>Web Workers</span>
-          </div>
-          <div class="project-links">
-            <a href="#" target="_blank" rel="noopener">&#8599; GitHub</a>
-            <a href="#" target="_blank" rel="noopener">&#8599; Live</a>
-          </div>
-        </div>
-
-        <div class="project-card fade-in">
-          <div class="project-icon">&#128190;</div>
-          <h3 class="project-name">LogVault</h3>
-          <p class="project-desc">开发者日志管理工具，支持全文搜索、标签分类、Markdown 编辑和导出。数据存储在本地 IndexedDB。</p>
-          <div class="project-tech">
-            <span>React</span><span>IndexedDB</span><span>Markdown</span>
-          </div>
-          <div class="project-links">
-            <a href="#" target="_blank" rel="noopener">&#8599; GitHub</a>
-          </div>
-        </div>
+        <div class="project-card fade-in"><div class="project-icon">&#9881;</div><h3 class="project-name">CyberDashboard</h3><p class="project-desc">开源的赛博朋克风格系统监控面板，实时数据可视化，Terminal UI。</p><div class="project-tech"><span>TypeScript</span><span>Node.js</span><span>WebSocket</span><span>Canvas</span></div><div class="project-links"><a href="#" target="_blank">&#8599; GitHub</a><a href="#" target="_blank">&#8599; Demo</a></div></div>
+        <div class="project-card fade-in"><div class="project-icon">&#9760;</div><h3 class="project-name">NeonUI</h3><p class="project-desc">赛博朋克风格 UI 组件库，支持主题定制，Web Components 实现。</p><div class="project-tech"><span>CSS</span><span>Web Components</span><span>Storybook</span></div><div class="project-links"><a href="#" target="_blank">&#8599; GitHub</a><a href="#" target="_blank">&#8599; Docs</a></div></div>
+        <div class="project-card fade-in"><div class="project-icon">&#9762;</div><h3 class="project-name">PixelForge</h3><p class="project-desc">浏览器端像素画编辑器，支持图层、调色板、动画帧、Canvas + Web Workers。</p><div class="project-tech"><span>JavaScript</span><span>Canvas</span><span>Web Workers</span></div><div class="project-links"><a href="#" target="_blank">&#8599; GitHub</a><a href="#" target="_blank">&#8599; Live</a></div></div>
+        <div class="project-card fade-in"><div class="project-icon">&#128190;</div><h3 class="project-name">LogVault</h3><p class="project-desc">开发者日志管理工具，全文搜索、标签分类、Markdown 编辑。数据存 IndexedDB。</p><div class="project-tech"><span>React</span><span>IndexedDB</span><span>Markdown</span></div><div class="project-links"><a href="#" target="_blank">&#8599; GitHub</a></div></div>
       </div>
     </div>
   </section>
 
-  <div class="deco-divider fade-in">
-    <div class="line-h"></div>
-    <div class="diamond"></div>
-    <div class="line-h"></div>
-  </div>
+  <div class="deco-divider fade-in"><div class="line-h"></div><div class="diamond"></div><div class="line-h"></div></div>
 
   <!-- ============================================================
-       STATS DASHBOARD
+       STATS
        ============================================================ -->
   <section id="stats" class="section">
     <div class="container">
@@ -270,28 +175,35 @@
         <h2 class="section-title">System Stats</h2>
         <div class="section-line"></div>
       </div>
-
       <div class="stats-grid fade-in">
-        <div class="stat-card">
-          <div class="stat-icon">&#9679;</div>
-          <div class="stat-number" data-target="1247">0</div>
-          <div class="stat-label">GitHub Commits</div>
+        <div class="stat-card"><div class="stat-icon">&#9679;</div><div class="stat-number" data-target="1247">0</div><div class="stat-label">GitHub Commits</div></div>
+        <div class="stat-card"><div class="stat-icon">&#9733;</div><div class="stat-number" data-target="386">0</div><div class="stat-label">Stars Received</div></div>
+        <div class="stat-card"><div class="stat-icon">&#9830;</div><div class="stat-number" data-target="42">0</div><div class="stat-label">Open Source Projects</div></div>
+        <div class="stat-card"><div class="stat-icon">&#9670;</div><div class="stat-number" data-target="8912">0</div><div class="stat-label">Lines of Code</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       GUESTBOOK
+       ============================================================ -->
+  <section id="guestbook" class="section">
+    <div class="container">
+      <div class="section-header fade-in">
+        <span class="section-tag">&lt;guestbook /&gt;</span>
+        <h2 class="section-title">Guestbook</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="guestbook-inner fade-in" style="max-width:640px;margin:0 auto;">
+        <div class="guestbook-form">
+          <textarea id="gb-message" placeholder="> 留下你的足迹..." rows="3"></textarea>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="text" id="gb-author" placeholder="你的名字" style="flex:1;">
+            <button class="btn btn-primary" id="gb-submit">发送</button>
+          </div>
+          <p id="gb-login-hint" style="font-size:0.72rem;color:var(--neon-amber);margin-top:8px;display:none;">&#9888; 请先登录后再留言</p>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon">&#9733;</div>
-          <div class="stat-number" data-target="386">0</div>
-          <div class="stat-label">Stars Received</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">&#9830;</div>
-          <div class="stat-number" data-target="42">0</div>
-          <div class="stat-label">Open Source Projects</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">&#9670;</div>
-          <div class="stat-number" data-target="8912">0</div>
-          <div class="stat-label">Lines of Code</div>
-        </div>
+        <div id="gb-messages" class="gb-messages"><!-- JS render --></div>
       </div>
     </div>
   </section>
@@ -303,12 +215,12 @@
     <div class="newsletter-inner fade-in">
       <div class="newsletter-icon">&#9993;</div>
       <h3>Stay Connected</h3>
-      <p>订阅我的 Newsletter，获取最新文章和技术思考。<br>无垃圾邮件，随时可退订。</p>
+      <p>订阅 Newsletter，获取最新文章和技术思考。<br>无垃圾邮件，随时可退订。</p>
       <form id="newsletter-form" class="newsletter-form">
         <input type="email" id="newsletter-email" placeholder="your@email.com" required>
         <button type="submit" class="btn btn-primary">订阅</button>
       </form>
-      <p id="newsletter-success" class="newsletter-success">&#10003; 订阅成功！感谢你的关注。</p>
+      <p id="newsletter-success" class="newsletter-success">&#10003; 订阅成功！</p>
     </div>
   </section>
 
@@ -318,18 +230,9 @@
   <footer class="footer">
     <div class="footer-inner">
       <div class="footer-links">
-        <a href="#home">Home</a>
-        <a href="#blog">Blog</a>
-        <a href="#about">About</a>
-        <a href="#projects">Projects</a>
-        <a href="#stats">Stats</a>
-        <a href="#" id="rss-footer">RSS</a>
-        <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+        <a href="#home">Home</a><a href="#blog">Blog</a><a href="#about">About</a><a href="#projects">Projects</a><a href="#stats">Stats</a><a href="#guestbook">Guestbook</a><a href="#" id="rss-footer">RSS</a><a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
       </div>
-      <div class="footer-status">
-        <span class="status-dot"></span>
-        SYSTEM ONLINE · ALL SYSTEMS OPERATIONAL
-      </div>
+      <div class="footer-status"><span class="status-dot"></span>SYSTEM ONLINE · ALL SYSTEMS OPERATIONAL</div>
       <p class="footer-copy">&copy; 2026 终末之剑 · CYBER//BLOG. Powered by HTML/CSS/JS.</p>
       <p class="footer-hint">按 <kbd>?</kbd> 查看键盘快捷键</p>
     </div>
@@ -337,18 +240,39 @@
 
   <!-- Back to Top -->
   <button id="back-to-top" class="back-to-top" aria-label="Back to top">
-    <svg width="20" height="20" viewBox="0 0 20 20">
-      <circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="50" stroke-dashoffset="50" id="scroll-ring"/>
-    </svg>
+    <svg width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="50" stroke-dashoffset="50" id="scroll-ring"/></svg>
     <span style="position:absolute;">&#8593;</span>
   </button>
 
+  <!-- ============================================================
+       MODALS
+       ============================================================ -->
   <!-- Post Modal -->
   <div id="post-modal" class="modal-overlay">
-    <div class="modal">
+    <div class="modal" style="max-width:760px;">
       <button id="modal-close" class="modal-close" title="关闭 (Esc)">&times;</button>
-      <div id="modal-body" class="modal-body">
-        <!-- Rendered by JS -->
+      <div id="modal-body" class="modal-body"><!-- JS render --></div>
+    </div>
+  </div>
+
+  <!-- Auth Modal (Login / Register) -->
+  <div id="auth-modal" class="modal-overlay">
+    <div class="modal" style="max-width:420px;">
+      <button id="auth-close" class="modal-close">&times;</button>
+      <div class="modal-body" id="auth-body">
+        <h3 style="font-family:var(--font-display);color:var(--neon-primary);margin-bottom:20px;letter-spacing:0.08em;" id="auth-title">> LOGIN</h3>
+        <form id="auth-form">
+          <div class="auth-field"><label>用户名</label><input type="text" id="auth-username" placeholder="输入用户名" required autocomplete="off"></div>
+          <div class="auth-field" id="auth-email-field" style="display:none;"><label>邮箱</label><input type="email" id="auth-email" placeholder="your@email.com"></div>
+          <div class="auth-field"><label>密码</label><input type="password" id="auth-password" placeholder="输入密码" required></div>
+          <div class="auth-field" id="auth-confirm-field" style="display:none;"><label>确认密码</label><input type="password" id="auth-confirm" placeholder="再次输入密码"></div>
+          <p id="auth-error" style="color:var(--neon-red);font-size:0.75rem;display:none;margin-bottom:12px;"></p>
+          <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;" id="auth-submit">登录</button>
+        </form>
+        <p style="text-align:center;margin-top:16px;font-size:0.78rem;color:var(--text-muted);">
+          <span id="auth-switch-text">没有账号？</span>
+          <a href="#" id="auth-switch" style="margin-left:4px;">注册</a>
+        </p>
       </div>
     </div>
   </div>
@@ -362,18 +286,15 @@
         <div class="kb-list">
           <div class="kb-row"><kbd>?</kbd><span>显示 / 隐藏此帮助</span></div>
           <div class="kb-row"><kbd>Esc</kbd><span>关闭弹窗 / 清除终端</span></div>
-          <div class="kb-row"><kbd>1</kbd><span>跳转到首页</span></div>
-          <div class="kb-row"><kbd>2</kbd><span>跳转到博客</span></div>
-          <div class="kb-row"><kbd>3</kbd><span>跳转到关于</span></div>
-          <div class="kb-row"><kbd>4</kbd><span>跳转到项目</span></div>
+          <div class="kb-row"><kbd>1-5</kbd><span>跳转到对应板块</span></div>
           <div class="kb-row"><kbd>T</kbd><span>切换主题颜色</span></div>
           <div class="kb-row"><kbd>G</kbd><span>跳转到顶部</span></div>
+          <div class="kb-row"><kbd>L</kbd><span>喜欢当前文章</span></div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Scripts -->
   <script src="js/posts.js"></script>
   <script src="js/main.js"></script>
 </body>
