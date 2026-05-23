@@ -3,12 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="赛博朋克风格个人博客 — 技术分享、设计美学与数字生活">
-  <meta name="theme-color" content="#0a0a0f">
-  <title>CYBER//BLOG — 赛博朋克个人博客</title>
+  <meta name="description" content="终末之剑的赛博朋克数字空间 — 技术、设计与代码">
+  <meta name="theme-color" content="#060608">
+  <title>终末之剑 | CYBER//BLOG</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
+  <!-- ============================================================
+       LOADING BOOT SEQUENCE
+       ============================================================ -->
+  <div id="boot-screen">
+    <div class="boot-log" id="boot-log"></div>
+  </div>
+
+  <!-- ============================================================
+       READING PROGRESS
+       ============================================================ -->
+  <div id="reading-progress"></div>
+
   <!-- Ambient Layers -->
   <div class="vignette"></div>
 
@@ -26,6 +39,7 @@
         <li><a href="#blog">Blog</a></li>
         <li><a href="#about">About</a></li>
         <li><a href="#projects">Projects</a></li>
+        <li><a href="#stats">Stats</a></li>
         <li>
           <div class="theme-switcher">
             <span class="theme-dot green active" data-theme="green" title="Neon Green"></span>
@@ -47,24 +61,26 @@
   <section id="home" class="hero">
     <canvas id="matrix-bg"></canvas>
     <div class="hero-content">
-      <div class="terminal">
+      <div class="terminal" id="main-terminal">
         <div class="terminal-header">
-          <span class="terminal-dot red"></span>
-          <span class="terminal-dot yellow"></span>
-          <span class="terminal-dot green"></span>
+          <span class="terminal-dot red" title="Close"></span>
+          <span class="terminal-dot yellow" title="Minimize"></span>
+          <span class="terminal-dot green" title="Maximize"></span>
           <span class="terminal-title" style="margin-left:12px;">root@cyberblog:~</span>
-          <span class="terminal-title" style="margin-left:auto;">[LAT: 31.23 | LNG: 121.47 | UTC+8]</span>
+          <span class="terminal-title" id="live-clock" style="margin-left:auto;">[LOADING...]</span>
         </div>
-        <div class="terminal-body">
+        <div class="terminal-body" id="terminal-body">
           <div id="typing-text"></div>
-          <div style="margin-top: 24px;">
-            <div class="glitch-title" data-text="SYSTEM ONLINE">SYSTEM ONLINE</div>
-            <p class="hero-subtitle">
-              全栈开发者 · 开源贡献者 · <span class="highlight">赛博朋克爱好者</span>
-            </p>
-            <div class="hero-cta">
-              <a href="#blog" class="btn btn-primary">> 浏览文章</a>
-              <a href="#about" class="btn">> 关于我</a>
+          <div id="terminal-post-content">
+            <div style="margin-top: 24px;">
+              <div class="glitch-title" data-text="终末之剑">终末之剑</div>
+              <p class="hero-subtitle">
+                全栈开发者 · 开源贡献者 · <span class="highlight">赛博朋克爱好者</span>
+              </p>
+              <div class="hero-cta">
+                <a href="#blog" class="btn btn-primary">> 浏览文章</a>
+                <a href="#about" class="btn">> 关于我</a>
+              </div>
             </div>
           </div>
         </div>
@@ -124,17 +140,17 @@
             <span class="avatar-placeholder">&#9763;</span>
           </div>
           <div class="social-links">
-            <a href="#" class="social-link" title="GitHub">GH</a>
-            <a href="#" class="social-link" title="Twitter">TW</a>
-            <a href="#" class="social-link" title="Email">@</a>
-            <a href="#" class="social-link" title="RSS">RS</a>
+            <a href="https://github.com" target="_blank" rel="noopener" class="social-link" title="GitHub">GH</a>
+            <a href="https://twitter.com" target="_blank" rel="noopener" class="social-link" title="Twitter">TW</a>
+            <a href="mailto:hello@cyberblog.dev" class="social-link" title="Email">@</a>
+            <a href="#" class="social-link" title="RSS" id="rss-link">RS</a>
           </div>
         </div>
 
         <div class="about-text">
           <h3>&gt; whoami</h3>
           <p>
-            你好，我是一名热爱技术的全栈开发者。我相信代码不仅是一种工具，更是一种自我表达的方式。从 Web 开发到系统编程，从 UI 设计到性能优化——我对技术的每一个层面都充满好奇。
+            你好，我是 <strong>终末之剑</strong>，一名热爱技术的全栈开发者。我相信代码不仅是一种工具，更是一种自我表达的方式。从 Web 开发到系统编程，从 UI 设计到性能优化——我对技术的每一个层面都充满好奇。
           </p>
           <p>
             这个博客是我在数字世界的一片自留地。在这里我分享技术心得、设计思考和职业感悟。不追求流量和 SEO，只追求真诚和深度。
@@ -192,8 +208,8 @@
             <span>TypeScript</span><span>Node.js</span><span>WebSocket</span><span>Canvas</span>
           </div>
           <div class="project-links">
-            <a href="#">&#8599; GitHub</a>
-            <a href="#">&#8599; Demo</a>
+            <a href="#" target="_blank" rel="noopener">&#8599; GitHub</a>
+            <a href="#" target="_blank" rel="noopener">&#8599; Demo</a>
           </div>
         </div>
 
@@ -205,8 +221,8 @@
             <span>CSS</span><span>Web Components</span><span>Storybook</span>
           </div>
           <div class="project-links">
-            <a href="#">&#8599; GitHub</a>
-            <a href="#">&#8599; Docs</a>
+            <a href="#" target="_blank" rel="noopener">&#8599; GitHub</a>
+            <a href="#" target="_blank" rel="noopener">&#8599; Docs</a>
           </div>
         </div>
 
@@ -218,8 +234,8 @@
             <span>JavaScript</span><span>Canvas</span><span>Web Workers</span>
           </div>
           <div class="project-links">
-            <a href="#">&#8599; GitHub</a>
-            <a href="#">&#8599; Live</a>
+            <a href="#" target="_blank" rel="noopener">&#8599; GitHub</a>
+            <a href="#" target="_blank" rel="noopener">&#8599; Live</a>
           </div>
         </div>
 
@@ -231,8 +247,50 @@
             <span>React</span><span>IndexedDB</span><span>Markdown</span>
           </div>
           <div class="project-links">
-            <a href="#">&#8599; GitHub</a>
+            <a href="#" target="_blank" rel="noopener">&#8599; GitHub</a>
           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="deco-divider fade-in">
+    <div class="line-h"></div>
+    <div class="diamond"></div>
+    <div class="line-h"></div>
+  </div>
+
+  <!-- ============================================================
+       STATS DASHBOARD
+       ============================================================ -->
+  <section id="stats" class="section">
+    <div class="container">
+      <div class="section-header fade-in">
+        <span class="section-tag">&lt;metrics /&gt;</span>
+        <h2 class="section-title">System Stats</h2>
+        <div class="section-line"></div>
+      </div>
+
+      <div class="stats-grid fade-in">
+        <div class="stat-card">
+          <div class="stat-icon">&#9679;</div>
+          <div class="stat-number" data-target="1247">0</div>
+          <div class="stat-label">GitHub Commits</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">&#9733;</div>
+          <div class="stat-number" data-target="386">0</div>
+          <div class="stat-label">Stars Received</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">&#9830;</div>
+          <div class="stat-number" data-target="42">0</div>
+          <div class="stat-label">Open Source Projects</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">&#9670;</div>
+          <div class="stat-number" data-target="8912">0</div>
+          <div class="stat-label">Lines of Code</div>
         </div>
       </div>
     </div>
@@ -264,26 +322,53 @@
         <a href="#blog">Blog</a>
         <a href="#about">About</a>
         <a href="#projects">Projects</a>
-        <a href="#">RSS</a>
-        <a href="#">GitHub</a>
+        <a href="#stats">Stats</a>
+        <a href="#" id="rss-footer">RSS</a>
+        <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
       </div>
       <div class="footer-status">
         <span class="status-dot"></span>
         SYSTEM ONLINE · ALL SYSTEMS OPERATIONAL
       </div>
-      <p class="footer-copy">&copy; 2026 CYBER//BLOG. Powered by HTML/CSS/JS. No frameworks needed.</p>
+      <p class="footer-copy">&copy; 2026 终末之剑 · CYBER//BLOG. Powered by HTML/CSS/JS.</p>
+      <p class="footer-hint">按 <kbd>?</kbd> 查看键盘快捷键</p>
     </div>
   </footer>
 
   <!-- Back to Top -->
-  <button id="back-to-top" class="back-to-top" aria-label="Back to top">&#8593;</button>
+  <button id="back-to-top" class="back-to-top" aria-label="Back to top">
+    <svg width="20" height="20" viewBox="0 0 20 20">
+      <circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="50" stroke-dashoffset="50" id="scroll-ring"/>
+    </svg>
+    <span style="position:absolute;">&#8593;</span>
+  </button>
 
   <!-- Post Modal -->
   <div id="post-modal" class="modal-overlay">
     <div class="modal">
-      <button id="modal-close" class="modal-close">&times;</button>
+      <button id="modal-close" class="modal-close" title="关闭 (Esc)">&times;</button>
       <div id="modal-body" class="modal-body">
         <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Keyboard Shortcuts Modal -->
+  <div id="kb-modal" class="modal-overlay">
+    <div class="modal" style="max-width:560px;">
+      <button id="kb-close" class="modal-close">&times;</button>
+      <div class="modal-body">
+        <h3 style="font-family:var(--font-display);color:var(--neon-primary);margin-bottom:20px;letter-spacing:0.08em;">&gt; KEYBOARD_SHORTCUTS</h3>
+        <div class="kb-list">
+          <div class="kb-row"><kbd>?</kbd><span>显示 / 隐藏此帮助</span></div>
+          <div class="kb-row"><kbd>Esc</kbd><span>关闭弹窗 / 清除终端</span></div>
+          <div class="kb-row"><kbd>1</kbd><span>跳转到首页</span></div>
+          <div class="kb-row"><kbd>2</kbd><span>跳转到博客</span></div>
+          <div class="kb-row"><kbd>3</kbd><span>跳转到关于</span></div>
+          <div class="kb-row"><kbd>4</kbd><span>跳转到项目</span></div>
+          <div class="kb-row"><kbd>T</kbd><span>切换主题颜色</span></div>
+          <div class="kb-row"><kbd>G</kbd><span>跳转到顶部</span></div>
+        </div>
       </div>
     </div>
   </div>

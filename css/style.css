@@ -1038,6 +1038,256 @@ img { max-width: 100%; display: block; }
   .footer-links { gap: 12px; }
 }
 
+/* ============================================================
+   LOADING BOOT SEQUENCE
+   ============================================================ */
+#boot-screen {
+  position: fixed; inset: 0; z-index: 100000;
+  background: #020203;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.6s, visibility 0.6s;
+}
+#boot-screen.done { opacity: 0; visibility: hidden; pointer-events: none; }
+
+.boot-log {
+  font-family: var(--font-mono);
+  font-size: 0.78rem; color: var(--neon-primary);
+  max-width: 560px; width: 100%;
+  padding: 40px 24px;
+  line-height: 2;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 4px var(--neon-primary);
+}
+.boot-log .ok { color: #27c93f; }
+.boot-log .warn { color: var(--neon-amber); }
+.boot-log .info { color: var(--text-secondary); }
+
+/* ============================================================
+   READING PROGRESS BAR
+   ============================================================ */
+#reading-progress {
+  position: fixed; top: 0; left: 0; height: 2px;
+  z-index: 10001;
+  background: linear-gradient(90deg, var(--neon-primary), var(--neon-cyan));
+  box-shadow: 0 0 8px var(--neon-primary), 0 0 18px var(--neon-primary);
+  transition: width 0.1s linear;
+  width: 0%;
+}
+
+/* ============================================================
+   TERMINAL COMMAND INPUT
+   ============================================================ */
+.terminal-input-line {
+  display: flex; align-items: center; margin-top: 8px;
+}
+.terminal-input-line .prompt {
+  color: var(--neon-primary); margin-right: 8px;
+  white-space: nowrap;
+}
+.terminal-input-line input {
+  flex: 1; background: transparent; border: none;
+  color: var(--text-bright); font-family: var(--font-mono);
+  font-size: 0.88rem; outline: none; caret-color: var(--neon-primary);
+}
+
+.terminal-output-line {
+  margin-bottom: 4px; line-height: 1.7;
+}
+.terminal-output-line .cmd-echo { color: var(--text-bright); }
+.terminal-output-line .result  { color: var(--text-secondary); }
+.terminal-output-line .error   { color: var(--neon-red); }
+.terminal-output-line .cyan    { color: var(--neon-cyan); }
+.terminal-output-line .magenta { color: var(--neon-magenta); }
+
+/* ============================================================
+   STATS DASHBOARD
+   ============================================================ */
+.stats-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;
+}
+
+.stat-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 32px 20px;
+  text-align: center; transition: var(--transition);
+  position: relative; overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--neon-primary), transparent);
+  opacity: 0; transition: opacity var(--transition);
+}
+
+.stat-card:hover {
+  border-color: var(--neon-primary);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0,255,65,0.08);
+}
+.stat-card:hover::before { opacity: 1; }
+
+.stat-icon { font-size: 1.4rem; margin-bottom: 10px; color: var(--neon-primary); }
+.stat-number {
+  font-family: var(--font-display); font-size: 2rem;
+  font-weight: 700; color: var(--text-bright);
+  letter-spacing: 0.06em; margin-bottom: 6px;
+  text-shadow: 0 0 15px var(--neon-primary);
+}
+.stat-label {
+  font-size: 0.72rem; color: var(--text-muted);
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+
+/* ============================================================
+   ARTICLE TOC
+   ============================================================ */
+.post-toc {
+  background: rgba(0,255,65,0.02); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 16px 20px;
+  margin-bottom: 24px;
+}
+.post-toc-title {
+  font-family: var(--font-display); font-size: 0.8rem;
+  color: var(--neon-primary); margin-bottom: 10px;
+  letter-spacing: 0.08em;
+}
+.post-toc a {
+  display: block; font-size: 0.8rem; color: var(--text-secondary);
+  padding: 3px 0; transition: var(--transition);
+}
+.post-toc a:hover { color: var(--neon-primary); padding-left: 6px; }
+
+/* ============================================================
+   COPY CODE BUTTON
+   ============================================================ */
+.code-block-wrapper {
+  position: relative; margin: 16px 0;
+}
+.code-block-wrapper .copy-btn {
+  position: absolute; top: 8px; right: 8px;
+  padding: 4px 10px;
+  font-family: var(--font-mono); font-size: 0.68rem;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text-muted);
+  cursor: pointer; transition: var(--transition);
+  opacity: 0;
+}
+.code-block-wrapper:hover .copy-btn { opacity: 1; }
+.code-block-wrapper .copy-btn:hover {
+  border-color: var(--neon-primary); color: var(--neon-primary);
+  box-shadow: 0 0 8px var(--border-glow);
+}
+.code-block-wrapper .copy-btn.copied {
+  border-color: var(--neon-primary); color: var(--neon-primary);
+}
+
+/* ============================================================
+   RELATED POSTS
+   ============================================================ */
+.related-posts {
+  margin-top: 28px; padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+.related-posts-title {
+  font-family: var(--font-display); font-size: 0.85rem;
+  color: var(--neon-primary); margin-bottom: 14px;
+  letter-spacing: 0.08em;
+}
+.related-posts-list { display: flex; flex-direction: column; gap: 8px; }
+.related-post-item {
+  font-size: 0.82rem; color: var(--text-secondary);
+  cursor: pointer; transition: var(--transition);
+  padding: 6px 10px; border-left: 2px solid transparent;
+}
+.related-post-item:hover {
+  color: var(--neon-primary); border-left-color: var(--neon-primary);
+  background: rgba(0,255,65,0.03);
+}
+
+/* ============================================================
+   SHARE BUTTONS
+   ============================================================ */
+.share-buttons {
+  display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap;
+}
+.share-btn {
+  padding: 5px 14px; font-family: var(--font-mono); font-size: 0.7rem;
+  background: transparent; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text-muted);
+  cursor: pointer; transition: var(--transition);
+  letter-spacing: 0.06em;
+}
+.share-btn:hover {
+  border-color: var(--neon-primary); color: var(--neon-primary);
+  box-shadow: 0 0 10px var(--border-glow);
+}
+
+/* ============================================================
+   KEYBOARD SHORTCUTS
+   ============================================================ */
+.kb-list { display: flex; flex-direction: column; gap: 10px; }
+.kb-row {
+  display: flex; align-items: center; gap: 14px;
+  font-size: 0.82rem; color: var(--text-secondary);
+}
+.kb-row kbd {
+  min-width: 36px; text-align: center;
+  padding: 3px 8px; font-family: var(--font-mono); font-size: 0.72rem;
+  background: var(--bg-primary); border: 1px solid var(--border);
+  border-radius: 3px; color: var(--neon-primary);
+  box-shadow: 0 0 4px var(--border-glow);
+}
+
+.footer-hint {
+  font-size: 0.65rem; color: var(--text-muted);
+  margin-top: 8px; letter-spacing: 0.06em;
+}
+.footer-hint kbd {
+  padding: 2px 6px; font-family: var(--font-mono);
+  background: var(--bg-primary); border: 1px solid var(--border);
+  border-radius: 3px; color: var(--neon-primary);
+}
+
+/* ============================================================
+   SCROLL RING
+   ============================================================ */
+.back-to-top svg { position: relative; z-index: 1; }
+
+/* ============================================================
+   KONAMI EASTER EGG
+   ============================================================ */
+.easter-egg-toast {
+  position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+  z-index: 20000;
+  background: var(--bg-card); border: 2px solid var(--neon-magenta);
+  border-radius: var(--radius-md); padding: 16px 24px;
+  font-family: var(--font-display); font-size: 1rem;
+  color: var(--neon-magenta); letter-spacing: 0.1em;
+  box-shadow: 0 0 30px var(--neon-magenta), 0 0 60px rgba(255,0,255,0.3);
+  animation: easter-egg-in 0.5s ease, easter-egg-out 0.5s ease 2.5s forwards;
+  pointer-events: none;
+}
+@keyframes easter-egg-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+@keyframes easter-egg-out {
+  from { opacity: 1; transform: translateX(-50%) translateY(0); }
+  to { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+}
+
+/* ============================================================
+   RESPONSIVE ADDITIONS
+   ============================================================ */
+@media (max-width: 1024px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .boot-log { font-size: 0.68rem; padding: 24px 16px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
