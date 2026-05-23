@@ -67,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initTimedTheme();
     initManual();
     initNeonDrawing();
+    initNeonClock();
   });
 });
 
@@ -253,7 +254,7 @@ function initTypingEffect() {
     let result = '';
     if (!cmd) { result = ''; }
     else if (cmd === 'help') {
-      result = '<span class="cyan">命令列表:</span><br><span class="cmd-echo">help</span> / <span class="cmd-echo">whoami</span> / <span class="cmd-echo">neofetch</span> / <span class="cmd-echo">ls</span> / <span class="cmd-echo">cat blog|about</span> / <span class="cmd-echo">date</span> / <span class="cmd-echo">theme g|c|m</span> / <span class="cmd-echo">matrix</span> / <span class="cmd-echo">ascii</span> / <span class="cmd-echo">play</span> / <span class="cmd-echo">rain 0-100</span> / <span class="cmd-echo">checkin</span> / <span class="cmd-echo">glitch</span> / <span class="cmd-echo">manual</span> / <span class="cmd-echo">clear</span> / <span class="cmd-echo">sudo</span> / <span class="cmd-echo">exit</span>';
+      result = '<span class="cyan">命令列表:</span><br><span class="cmd-echo">help</span> / <span class="cmd-echo">whoami</span> / <span class="cmd-echo">neofetch</span> / <span class="cmd-echo">ls</span> / <span class="cmd-echo">cat blog|about</span> / <span class="cmd-echo">date</span> / <span class="cmd-echo">theme g|c|m</span> / <span class="cmd-echo">matrix</span> / <span class="cmd-echo">ascii</span> / <span class="cmd-echo">play</span> / <span class="cmd-echo">rain 0-100</span> / <span class="cmd-echo">checkin</span> / <span class="cmd-echo">glitch</span> / <span class="cmd-echo">manual</span> / <span class="cmd-echo">time</span> / <span class="cmd-echo">clear</span> / <span class="cmd-echo">sudo</span> / <span class="cmd-echo">exit</span>';
     } else if (cmd === 'whoami') { result = '<span class="cyan">终末之剑</span> — 全栈开发者 / 开源贡献者 / 赛博朋克爱好者'; }
     else if (cmd === 'neofetch') {
       const d = new Date();
@@ -262,6 +263,7 @@ function initTypingEffect() {
     else if (cmd === 'cat blog') { result = '跳转到博客...'; setTimeout(() => document.getElementById('blog').scrollIntoView({ behavior: 'smooth' }), 300); }
     else if (cmd === 'cat about') { result = '跳转到关于...'; setTimeout(() => document.getElementById('about').scrollIntoView({ behavior: 'smooth' }), 300); }
     else if (cmd === 'date') { result = new Date().toLocaleString('zh-CN'); }
+    else if (cmd === 'time') { result = getTimeDisplay(); }
     else if (cmd.startsWith('theme ')) {
       const t = cmd.split(' ')[1]; const m = { g: 'green', c: 'cyan', m: 'magenta', green: 'green', cyan: 'cyan', magenta: 'magenta' };
       const th = m[t];
@@ -2251,4 +2253,67 @@ function initNeonDrawing() {
 
   canvas.addEventListener('mouseup', () => { drawing = false; });
   canvas.addEventListener('mouseleave', () => { drawing = false; });
+}
+
+/* ============================================================
+   NEW FEATURE 23: NEON DIGITAL CLOCK + time 命令
+   ============================================================ */
+function initNeonClock() {
+  const timeEl = document.getElementById('clock-time');
+  const dateEl = document.getElementById('clock-date');
+  const binaryEl = document.getElementById('clock-binary');
+  const ringEl = document.getElementById('clock-ring-sec');
+  if (!timeEl || !dateEl) return;
+
+  const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+
+  function pad(n) { return n.toString().padStart(2, '0'); }
+
+  function toBinary(n, bits) {
+    return n.toString(2).padStart(bits, '0');
+  }
+
+  function update() {
+    const now = new Date();
+    const h = now.getHours();
+    const m = now.getMinutes();
+    const s = now.getSeconds();
+
+    // 主时钟
+    timeEl.textContent = pad(h) + ':' + pad(m) + ':' + pad(s);
+
+    // 日期
+    dateEl.textContent = now.getFullYear() + '年' + pad(now.getMonth() + 1) + '月' + pad(now.getDate()) + '日 星期' + weekDays[now.getDay()];
+
+    // 二进制时间
+    binaryEl.textContent = toBinary(h, 5) + ' ' + toBinary(m, 6) + ' ' + toBinary(s, 6);
+
+    // 秒进度环 (0-60 → 0-289)
+    if (ringEl) {
+      const circumference = 289;
+      const progress = s / 60;
+      ringEl.style.strokeDashoffset = circumference - progress * circumference;
+    }
+  }
+
+  update();
+  setInterval(update, 1000);
+}
+
+function getTimeDisplay() {
+  const now = new Date();
+  const pad = n => n.toString().padStart(2, '0');
+  const toBin = (n, b) => n.toString(2).padStart(b, '0');
+
+  const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+
+  return `<span class="cyan">>>> TIME MATRIX <<<</span><br>
+    <span class="cmd-echo">标准时间:</span> ${pad(h)}:${pad(m)}:${pad(s)} CST<br>
+    <span class="cmd-echo">北京时间:</span> ${now.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}<br>
+    <span class="cmd-echo">UTC时间:</span>  ${now.toISOString().replace('T', ' ').slice(0, 19)}<br>
+    <span class="cmd-echo">Unix时间戳:</span> ${Math.floor(now.getTime() / 1000)}<br>
+    <span class="cmd-echo">ISO 8601:</span>  ${now.toISOString()}<br>
+    <span class="cmd-echo">二进制时间:</span> ${toBin(h, 5)}:${toBin(m, 6)}:${toBin(s, 6)}<br>
+    <span class="cmd-echo">十六进制:</span> 0x${h.toString(16).padStart(2,'0')}:0x${m.toString(16).padStart(2,'0')}:0x${s.toString(16).padStart(2,'0')}<br>
+    <span class="cmd-echo">周数:</span>      第 ${Math.ceil((now - new Date(now.getFullYear(), 0, 1)) / 86400000 / 7)} 周 · 第 ${Math.ceil((now - new Date(now.getFullYear(), 0, 1)) / 86400000)} 天`;
 }
