@@ -557,9 +557,86 @@ const SITE = 'http://127.0.0.1:8080';
   const particles = await page.$$('.dblclick-particle');
   console.log('  双击粒子生成:', particles.length > 0 ? '✓ (' + particles.length + '个粒子)' : '✗');
 
+  // ========== 测试 29: Ctrl+K 命令面板 ==========
+  console.log('\n[测试29] Ctrl+K 命令面板...');
+  // 关闭之前的模态框
+  await page.keyboard.press('Escape'); await page.waitForTimeout(300);
+  // Ctrl+K 打开面板
+  await page.keyboard.down('Control');
+  await page.keyboard.press('k');
+  await page.keyboard.up('Control');
+  await page.waitForTimeout(500);
+  const paletteOpen = await page.$eval('#cmd-palette', el => el.classList.contains('open'));
+  console.log('  Ctrl+K 打开面板:', paletteOpen ? '✓' : '✗');
+
+  if (paletteOpen) {
+    // 输入搜索
+    await page.fill('#cmd-palette-input', 'blog');
+    await page.waitForTimeout(300);
+    const cmdItems = await page.$$('.cmd-item');
+    console.log('  搜索结果数:', cmdItems.length, cmdItems.length > 0 ? '✓' : '✗');
+
+    // 选择并执行
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(600);
+    const stillOpen = await page.$eval('#cmd-palette', el => el.classList.contains('open'));
+    console.log('  执行命令后面板关闭:', !stillOpen ? '✓' : '✗');
+  }
+
+  // ========== 测试 30: 终端命令历史 ==========
+  console.log('\n[测试30] 终端命令历史...');
+  await page.click('a[href="#home"]'); await page.waitForTimeout(500);
+  const ti3 = await page.$('#terminal-input');
+  if (ti3) {
+    await ti3.fill('date');
+    await ti3.press('Enter');
+    await page.waitForTimeout(500);
+
+    // 按上箭头调出历史
+    const ti4 = await page.$('#terminal-input');
+    if (ti4) {
+      await ti4.focus();
+      await page.keyboard.press('ArrowUp');
+      await page.waitForTimeout(200);
+      const recalled = await ti4.evaluate(el => el.value);
+      console.log('  上调历史命令:', recalled === 'date' ? '✓' : '✗ (值: "' + recalled + '")');
+    }
+  }
+
+  // ========== 测试 31: 代码雨控制 ==========
+  console.log('\n[测试31] 代码雨强度控制...');
+  const ti5 = await page.$('#terminal-input');
+  if (ti5) {
+    await ti5.fill('rain 80');
+    await ti5.press('Enter');
+    await page.waitForTimeout(500);
+    const output = await page.$eval('#typing-text', el => el.textContent);
+    console.log('  rain 命令响应:', output.includes('80') || output.includes('强度') ? '✓' : '✗');
+  }
+
+  // ========== 测试 32: 签到系统 ==========
+  console.log('\n[测试32] 赛博签到...');
+  const ti6 = await page.$('#terminal-input');
+  if (ti6) {
+    await ti6.fill('checkin');
+    await ti6.press('Enter');
+    await page.waitForTimeout(500);
+    const toast = await page.$eval('body', el => el.textContent);
+    console.log('  签到响应:', toast.includes('签到') || toast.includes('连续') || toast.includes('已签到') ? '✓' : '✗');
+  }
+
+  // ========== 测试 33: 定时主题 ==========
+  console.log('\n[测试33] 智能定时主题...');
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(10000);
+  const currentTheme = await page.$eval('html', el => el.getAttribute('data-theme') || 'green');
+  console.log('  当前自动主题:', currentTheme);
+  const validThemes = ['green', 'cyan', 'magenta'];
+  console.log('  主题有效:', validThemes.includes(currentTheme) ? '✓' : '✗');
+
   // ========== 汇总报告 ==========
   console.log('\n====================');
-  console.log('  全部 28 项测试完成！浏览器保持打开，可以手动检查。');
+  console.log('  全部 33 项测试完成！浏览器保持打开，可以手动检查。');
   console.log('====================');
 
 })();

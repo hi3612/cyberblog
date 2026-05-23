@@ -60,6 +60,11 @@ document.addEventListener('DOMContentLoaded', () => {
     initRandomQuotes();
     initNewsTicker();
     initDblClickExplosion();
+    initCommandPalette();
+    initTerminalHistory();
+    initRainControl();
+    initCheckIn();
+    initTimedTheme();
   });
 });
 
@@ -246,7 +251,7 @@ function initTypingEffect() {
     let result = '';
     if (!cmd) { result = ''; }
     else if (cmd === 'help') {
-      result = '<span class="cyan">命令列表:</span><br><span class="cmd-echo">help</span> / <span class="cmd-echo">whoami</span> / <span class="cmd-echo">neofetch</span> / <span class="cmd-echo">ls</span> / <span class="cmd-echo">cat blog|about</span> / <span class="cmd-echo">date</span> / <span class="cmd-echo">theme g|c|m</span> / <span class="cmd-echo">matrix</span> / <span class="cmd-echo">ascii</span> / <span class="cmd-echo">play</span> / <span class="cmd-echo">clear</span> / <span class="cmd-echo">sudo</span> / <span class="cmd-echo">exit</span>';
+      result = '<span class="cyan">命令列表:</span><br><span class="cmd-echo">help</span> / <span class="cmd-echo">whoami</span> / <span class="cmd-echo">neofetch</span> / <span class="cmd-echo">ls</span> / <span class="cmd-echo">cat blog|about</span> / <span class="cmd-echo">date</span> / <span class="cmd-echo">theme g|c|m</span> / <span class="cmd-echo">matrix</span> / <span class="cmd-echo">ascii</span> / <span class="cmd-echo">play</span> / <span class="cmd-echo">rain 0-100</span> / <span class="cmd-echo">checkin</span> / <span class="cmd-echo">clear</span> / <span class="cmd-echo">sudo</span> / <span class="cmd-echo">exit</span>';
     } else if (cmd === 'whoami') { result = '<span class="cyan">终末之剑</span> — 全栈开发者 / 开源贡献者 / 赛博朋克爱好者'; }
     else if (cmd === 'neofetch') {
       const d = new Date();
@@ -265,6 +270,12 @@ function initTypingEffect() {
     else if (cmd === 'sudo') { result = '<span class="error">Permission denied. 你不是 root。</span>'; }
     else if (cmd === 'play') { startTerminalGame(el); return; }
     else if (cmd === 'ascii') { result = getRandomASCII(); }
+    else if (cmd === 'checkin') { doCheckIn(); result = '<span class="info">签到处理中...</span>'; }
+    else if (cmd.startsWith('rain ')) {
+      const v = cmd.split(' ')[1];
+      const ok = window._setRainIntensity ? window._setRainIntensity(v) : false;
+      result = ok ? `矩阵雨强度已设为: ${v}%` : '<span class="error">用法: rain 0-100</span>';
+    }
     else if (cmd === 'exit') { result = 'Connection closed.'; }
     else { result = `<span class="error">命令未找到: ${escHtml(cmd)}。输入 help 查看。</span>`; }
 
@@ -1752,4 +1763,282 @@ function initDblClickExplosion() {
 
     if (soundEnabled) playBeep(200, 0.15, 'sawtooth');
   });
+}
+
+/* ============================================================
+   NEW FEATURE 15: COMMAND PALETTE (Ctrl+K)
+   ============================================================ */
+const PALETTE_COMMANDS = [
+  { name: '前往首页', hint: 'Home', action: () => scrollToSection('home') },
+  { name: '前往博客', hint: 'Blog', action: () => scrollToSection('blog') },
+  { name: '关于我', hint: 'About', action: () => scrollToSection('about') },
+  { name: '项目展示', hint: 'Projects', action: () => scrollToSection('projects') },
+  { name: '统计数据', hint: 'Stats', action: () => scrollToSection('stats') },
+  { name: '留言板', hint: 'Guestbook', action: () => scrollToSection('guestbook') },
+  { name: '切换绿色主题', hint: 'Theme Green', action: () => setTheme('green') },
+  { name: '切换青色主题', hint: 'Theme Cyan', action: () => setTheme('cyan') },
+  { name: '切换品红主题', hint: 'Theme Magenta', action: () => setTheme('magenta') },
+  { name: '打开快捷键帮助', hint: '?', action: () => document.getElementById('kb-modal').classList.add('open') },
+  { name: '赛博占卜', hint: 'Oracle', action: () => document.getElementById('cyber-oracle').click() },
+  { name: '签到打卡', hint: 'Check-in', action: () => doCheckIn() },
+  { name: '回到顶部', hint: 'Top', action: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
+];
+
+function scrollToSection(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth' });
+}
+
+function setTheme(t) {
+  if (t === 'green') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('cyberblog-theme', t);
+  document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active'));
+  const dot = document.querySelector(`.theme-dot.${t}`); if (dot) dot.classList.add('active');
+}
+
+function initCommandPalette() {
+  const overlay = document.getElementById('cmd-palette');
+  const input = document.getElementById('cmd-palette-input');
+  const results = document.getElementById('cmd-palette-results');
+  if (!overlay || !input) return;
+
+  let selectedIdx = 0;
+
+  function open() {
+    overlay.classList.add('open');
+    input.value = '';
+    input.focus();
+    renderResults('');
+  }
+
+  function close() {
+    overlay.classList.remove('open');
+    selectedIdx = 0;
+  }
+
+  function renderResults(query) {
+    const q = query.toLowerCase();
+    const filtered = PALETTE_COMMANDS.filter(c =>
+      c.name.toLowerCase().includes(q) || c.hint.toLowerCase().includes(q)
+    );
+    if (filtered.length === 0) {
+      results.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);">无匹配命令</div>';
+      return;
+    }
+    results.innerHTML = filtered.map((c, i) =>
+      `<div class="cmd-item ${i === selectedIdx ? 'selected' : ''}" data-idx="${i}">
+        <span class="cmd-name">${highlightMatch(c.name, q)}</span>
+        <span class="cmd-hint">${c.hint}</span>
+      </div>`
+    ).join('');
+
+    results.querySelectorAll('.cmd-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const idx = parseInt(item.dataset.idx);
+        if (filtered[idx]) { filtered[idx].action(); close(); }
+      });
+    });
+  }
+
+  function highlightMatch(text, query) {
+    if (!query) return text;
+    const idx = text.toLowerCase().indexOf(query);
+    if (idx === -1) return text;
+    return text.substring(0, idx) + '<span style="color:var(--neon-primary);">' + text.substring(idx, idx + query.length) + '</span>' + text.substring(idx + query.length);
+  }
+
+  input.addEventListener('input', () => { selectedIdx = 0; renderResults(input.value.trim()); });
+  input.addEventListener('keydown', (e) => {
+    const filtered = PALETTE_COMMANDS.filter(c => c.name.toLowerCase().includes(input.value.trim().toLowerCase()) || c.hint.toLowerCase().includes(input.value.trim().toLowerCase()));
+    if (e.key === 'ArrowDown') { e.preventDefault(); selectedIdx = Math.min(selectedIdx + 1, filtered.length - 1); renderResults(input.value.trim()); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); selectedIdx = Math.max(selectedIdx - 1, 0); renderResults(input.value.trim()); }
+    else if (e.key === 'Enter') { e.preventDefault(); if (filtered[selectedIdx]) { filtered[selectedIdx].action(); close(); } }
+    else if (e.key === 'Escape') { close(); }
+  });
+
+  overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      overlay.classList.contains('open') ? close() : open();
+    }
+  });
+}
+
+/* ============================================================
+   NEW FEATURE 16: TERMINAL COMMAND HISTORY
+   ============================================================ */
+function initTerminalHistory() {
+  const history = [];
+  let historyIdx = -1;
+
+  // 全局监听终端输入框
+  document.addEventListener('keydown', (e) => {
+    const inp = document.activeElement;
+    if (!inp || inp.id !== 'terminal-input') return;
+
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (history.length === 0) return;
+      if (historyIdx === -1) historyIdx = history.length - 1;
+      else historyIdx = Math.max(0, historyIdx - 1);
+      inp.value = history[historyIdx];
+      // 光标移到末尾
+      setTimeout(() => { inp.selectionStart = inp.selectionEnd = inp.value.length; }, 0);
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (historyIdx === -1) return;
+      historyIdx++;
+      if (historyIdx >= history.length) { historyIdx = -1; inp.value = ''; }
+      else inp.value = history[historyIdx];
+      setTimeout(() => { inp.selectionStart = inp.selectionEnd = inp.value.length; }, 0);
+    } else if (e.key === 'Enter') {
+      const cmd = inp.value.trim();
+      if (cmd) {
+        // 不重复连续相同命令
+        if (history.length === 0 || history[history.length - 1] !== cmd) {
+          history.push(cmd);
+          if (history.length > 50) history.shift();
+        }
+        historyIdx = -1;
+      }
+    }
+  });
+}
+
+/* ============================================================
+   NEW FEATURE 17: RAIN INTENSITY CONTROL
+   ============================================================ */
+function initRainControl() {
+  // 在终端命令 exec 中添加 rain 命令处理
+  // 这里通过劫持 exec 来添加 rain 命令
+  window._setRainIntensity = function(val) {
+    const num = parseInt(val);
+    if (isNaN(num) || num < 0 || num > 100) return false;
+    const opacity = num / 100 * 0.3;
+    window._matrixIntensity = num / 20;
+    if (window._matrixCanvas) window._matrixCanvas.style.opacity = opacity;
+    return true;
+  };
+}
+
+// 在 exec 中添加 rain 命令 — 我们直接在这里打补丁
+// rain 命令通过前面的 exec 逻辑中的 else if 添加
+// 需要在 exec 函数中添加 rain 支持
+// 补丁方式：在 cmd === 'exit' 前添加 rain 命令检测
+// 实际上已经在 exec 中了，通过在 terminal 命令初始化后劫持
+// 最简单的方式是修改 exec 函数中的条件分支
+// 这里我们采用另一个方法：在 initTerminalHistory 之后给 exec 打补丁
+
+// 这个功能通过终端命令 "rain 50" 来实现，需要在 exec 中处理
+// exec 已经在闭包中，无法直接修改
+// 让我用另一种方式：在 exec 被调用之前拦截
+
+// 实际实现：修改 addPrompt 中 exec 函数的定义，我们无法修改闭包
+// 最简单的方案：在 initTypingEffect 中的 exec() 逻辑里已经有 rain 命令
+// 实际上没有！让我在 play 命令附近添加 rain 支持
+
+// 由于 exec 是闭包内部函数，修改复杂，这里用另一种方式
+// Note: rain 命令需要在 exec 函数内处理，由于 exec 是闭包
+// 我们在 exec 的最终 fallback 之前添加了 rain 命令支持
+// 这里劫持所有 terminal-input 的回车事件作为备选
+(function patchRainCommand() {
+  document.addEventListener('keydown', function rainPatch(e) {
+    const inp = e.target;
+    if (!inp || inp.id !== 'terminal-input') return;
+    if (e.key === 'Enter') {
+      const cmd = inp.value.trim().toLowerCase();
+      if (cmd.startsWith('rain ')) {
+        e.stopPropagation();
+        const val = cmd.split(' ')[1];
+        if (window._setRainIntensity) {
+          window._setRainIntensity(val);
+        }
+      }
+    }
+  }, true); // capture phase - fires before bubbling handlers
+})();
+
+// 在 exec 的 else if 链中动态注入 rain 支持
+// 通过修改 typing-text 的内容来劫持命令处理
+const origExec = null; // 由于 exec 在闭包中，我们在 addPrompt 中重新绑定
+// 实际通过下面的方式: 给 typing-text 区域的内容输出添加 rain 结果
+
+// 更简洁的方式: 在 exec 的 else 分支前插入 rain 检测
+// 已在 initTypingEffect > addPrompt > exec 中添加 (见 exec 函数内的 rain 命令)
+// 这里确认 rain 命令已存在于命令列表中
+
+/* ============================================================
+   NEW FEATURE 18: CHECK-IN SYSTEM
+   ============================================================ */
+function initCheckIn() {
+  window._doCheckIn = doCheckIn;
+}
+
+function doCheckIn() {
+  const today = new Date().toISOString().slice(0, 10);
+  const data = JSON.parse(localStorage.getItem('cb-checkin') || '{"lastDate":"","streak":0,"total":0}');
+
+  if (data.lastDate === today) {
+    showToast('今日已签到！连续 ' + data.streak + ' 天 | 总计 ' + data.total + ' 次');
+    return;
+  }
+
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  if (data.lastDate === yesterday) {
+    data.streak++;
+  } else if (data.lastDate !== today) {
+    data.streak = 1;
+  }
+  data.total++;
+  data.lastDate = today;
+  localStorage.setItem('cb-checkin', JSON.stringify(data));
+
+  let msg = '签到成功！连续 ' + data.streak + ' 天';
+  if (data.streak === 7) { msg += ' 🏆 周冠军！'; unlockAchievement('explorer'); }
+  if (data.streak === 30) msg += ' 👑 月度传奇！';
+  showToast(msg);
+
+  if (soundEnabled) playBeep(800, 0.06, 'sine');
+}
+
+/* ============================================================
+   NEW FEATURE 19: TIMED THEME
+   ============================================================ */
+function initTimedTheme() {
+  // 如果用户已经手动选择过主题，尊重用户选择
+  const userSet = localStorage.getItem('cyberblog-theme');
+  if (userSet) return; // 用户手动选过主题，不自动切换
+
+  const hour = new Date().getHours();
+  let autoTheme = 'green';
+
+  // 早上: 青色 (清醒)
+  // 下午: 绿色 (活力)
+  // 晚上/深夜: 品红 (赛博朋克氛围)
+  if (hour >= 6 && hour < 12) autoTheme = 'cyan';
+  else if (hour >= 12 && hour < 19) autoTheme = 'green';
+  else autoTheme = 'magenta';
+
+  setTheme(autoTheme);
+  localStorage.setItem('cyberblog-theme', autoTheme);
+
+  // 每小时检查一次
+  setInterval(() => {
+    const h = new Date().getHours();
+    const userSetNow = localStorage.getItem('cyberblog-theme');
+    // 如果用户手动切过，不再自动切
+    if (userSetNow && userSetNow !== 'cyan' && userSetNow !== 'green' && userSetNow !== 'magenta') return;
+    // 简单判断：如果过去一小时用户没手动改主题
+    let t = 'green';
+    if (h >= 6 && h < 12) t = 'cyan';
+    else if (h >= 12 && h < 19) t = 'green';
+    else t = 'magenta';
+    if (t !== localStorage.getItem('cyberblog-theme')) {
+      setTheme(t);
+      localStorage.setItem('cyberblog-theme', t);
+    }
+  }, 3600000);
 }
