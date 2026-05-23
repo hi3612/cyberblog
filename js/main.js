@@ -398,8 +398,10 @@ function initAuthUI() {
     }
   });
 
-  // Single global handler for closing user dropdowns
-  document.addEventListener('click', () => {
+  // Single global handler for closing user dropdowns (only when clicking outside)
+  document.addEventListener('click', (e) => {
+    const menu = e.target.closest('.user-menu');
+    if (menu) return; // Don't close if clicking inside the user menu
     const openDropdown = document.querySelector('.user-dropdown.open');
     if (openDropdown) openDropdown.classList.remove('open');
   });
