@@ -58,6 +58,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initCountdown();
     initDraggableTerminal();
     initRandomQuotes();
+    initNewsTicker();
+    initDblClickExplosion();
   });
 });
 
@@ -244,7 +246,7 @@ function initTypingEffect() {
     let result = '';
     if (!cmd) { result = ''; }
     else if (cmd === 'help') {
-      result = '<span class="cyan">命令列表:</span><br><span class="cmd-echo">help</span> / <span class="cmd-echo">whoami</span> / <span class="cmd-echo">neofetch</span> / <span class="cmd-echo">ls</span> / <span class="cmd-echo">cat blog|about</span> / <span class="cmd-echo">date</span> / <span class="cmd-echo">theme g|c|m</span> / <span class="cmd-echo">matrix</span> / <span class="cmd-echo">clear</span> / <span class="cmd-echo">sudo</span> / <span class="cmd-echo">exit</span>';
+      result = '<span class="cyan">命令列表:</span><br><span class="cmd-echo">help</span> / <span class="cmd-echo">whoami</span> / <span class="cmd-echo">neofetch</span> / <span class="cmd-echo">ls</span> / <span class="cmd-echo">cat blog|about</span> / <span class="cmd-echo">date</span> / <span class="cmd-echo">theme g|c|m</span> / <span class="cmd-echo">matrix</span> / <span class="cmd-echo">ascii</span> / <span class="cmd-echo">play</span> / <span class="cmd-echo">clear</span> / <span class="cmd-echo">sudo</span> / <span class="cmd-echo">exit</span>';
     } else if (cmd === 'whoami') { result = '<span class="cyan">终末之剑</span> — 全栈开发者 / 开源贡献者 / 赛博朋克爱好者'; }
     else if (cmd === 'neofetch') {
       const d = new Date();
@@ -261,6 +263,8 @@ function initTypingEffect() {
     } else if (cmd === 'matrix') { window._matrixIntensity = (window._matrixIntensity || 1) + 0.5; if (window._matrixCanvas) window._matrixCanvas.style.opacity = Math.min(0.3, 0.12 * window._matrixIntensity); result = `矩阵强度: ${Math.round(window._matrixIntensity * 100)}%`; }
     else if (cmd === 'clear') { el.innerHTML = ''; addPrompt(); return; }
     else if (cmd === 'sudo') { result = '<span class="error">Permission denied. 你不是 root。</span>'; }
+    else if (cmd === 'play') { startTerminalGame(el); return; }
+    else if (cmd === 'ascii') { result = getRandomASCII(); }
     else if (cmd === 'exit') { result = 'Connection closed.'; }
     else { result = `<span class="error">命令未找到: ${escHtml(cmd)}。输入 help 查看。</span>`; }
 
@@ -1507,5 +1511,245 @@ function initRandomQuotes() {
     }, 40);
 
     quoteAuthor.textContent = '— ' + quote.author;
+  });
+}
+
+/* ============================================================
+   NEW FEATURE 11: TERMINAL TYPING GAME (play 命令)
+   ============================================================ */
+const GAME_WORDS = [
+  'cyber', 'hack', 'neon', 'code', 'data', 'byte', 'chip', 'grid', 'node',
+  'void', 'flux', 'wire', 'pulse', 'glitch', 'matrix', 'kernel', 'shell',
+  'stack', 'heap', 'cache', 'proxy', 'crypto', 'token', 'server', 'client',
+  'router', 'packet', 'buffer', 'thread', 'daemon', 'socket', 'docker',
+];
+
+function startTerminalGame(el) {
+  // 移除旧输入框
+  const oldInput = document.getElementById('terminal-input');
+  if (oldInput) oldInput.parentElement.remove();
+
+  const gameDiv = document.createElement('div');
+  const words = [...GAME_WORDS].sort(() => Math.random() - 0.5).slice(0, 15);
+  let currentIdx = 0;
+  let correctCount = 0;
+  let wrongCount = 0;
+  let timeLeft = 30;
+  let gameOver = false;
+
+  gameDiv.innerHTML = `
+    <div class="terminal-output-line"><span class="cyan">=== 打字速度挑战 ===</span></div>
+    <div class="terminal-output-line">打出高亮单词后按空格，在 30 秒内尽可能多地完成！</div>
+    <div id="game-words">${words.map((w, i) =>
+      `<span class="terminal-game-word ${i === 0 ? 'current' : ''}">${w}</span>`
+    ).join('')}</div>
+    <div class="terminal-game-stats">
+      <span>⏱ <span id="game-timer">30</span>s</span>
+      <span>✅ <span id="game-correct">0</span></span>
+      <span>❌ <span id="game-wrong">0</span></span>
+    </div>
+    <div class="terminal-input-line" style="margin-top:12px;">
+      <span class="prompt">> </span>
+      <input type="text" id="game-input" placeholder="输入单词..." autocomplete="off" spellcheck="false">
+    </div>
+  `;
+
+  el.appendChild(gameDiv);
+  const gameInput = document.getElementById('game-input');
+  gameInput.focus();
+
+  // 定时器
+  const timerInterval = setInterval(() => {
+    timeLeft--;
+    const timerEl = document.getElementById('game-timer');
+    if (timerEl) timerEl.textContent = timeLeft;
+    if (timeLeft <= 0) endGame();
+  }, 1000);
+
+  gameInput.addEventListener('input', () => {
+    if (gameOver) return;
+    const val = gameInput.value.trim().toLowerCase();
+    const target = words[currentIdx];
+
+    // 检查是否匹配当前单词
+    if (val === target) {
+      correctCount++;
+      document.getElementById('game-correct').textContent = correctCount;
+      const wordEls = document.querySelectorAll('#game-words .terminal-game-word');
+      if (wordEls[currentIdx]) wordEls[currentIdx].classList.add('correct');
+
+      currentIdx++;
+      if (currentIdx >= words.length) {
+        endGame();
+        return;
+      }
+      if (wordEls[currentIdx]) wordEls[currentIdx].classList.add('current');
+      gameInput.value = '';
+
+      if (soundEnabled) playBeep(1000, 0.03, 'sine');
+    } else if (val.length >= target.length) {
+      // 已输入足够长度但不匹配
+      wrongCount++;
+      document.getElementById('game-wrong').textContent = wrongCount;
+      gameInput.value = '';
+
+      if (soundEnabled) playBeep(300, 0.05, 'square');
+    }
+  });
+
+  function endGame() {
+    if (gameOver) return;
+    gameOver = true;
+    clearInterval(timerInterval);
+    gameInput.disabled = true;
+
+    const wpm = Math.round(correctCount / 0.5); // 30s = 0.5min
+    const accuracy = correctCount + wrongCount > 0
+      ? Math.round(correctCount / (correctCount + wrongCount) * 100)
+      : 0;
+
+    let grade = 'F';
+    if (wpm >= 60) grade = 'S';
+    else if (wpm >= 50) grade = 'A';
+    else if (wpm >= 40) grade = 'B';
+    else if (wpm >= 30) grade = 'C';
+    else if (wpm >= 20) grade = 'D';
+
+    const gradeEmoji = { S: '🏆', A: '🥇', B: '🥈', C: '🥉', D: '📝', F: '💀' };
+    const gradeColor = { S: 'var(--neon-primary)', A: 'var(--neon-cyan)', B: '#27c93f', C: 'var(--neon-amber)', D: 'var(--neon-amber)', F: 'var(--neon-red)' };
+
+    const resultDiv = document.createElement('div');
+    resultDiv.className = 'terminal-output-line';
+    resultDiv.innerHTML = `
+      <br><span class="cyan">=== 游戏结束 ===</span><br>
+      <span>WPM (字/分钟): <span class="highlight">${wpm}</span></span><br>
+      <span>正确率: <span class="highlight">${accuracy}%</span></span><br>
+      <span>正确: <span class="highlight">${correctCount}</span> | 错误: <span class="highlight">${wrongCount}</span></span><br>
+      <span style="font-size:1.2rem;color:${gradeColor[grade]};">${gradeEmoji[grade]} 评级: ${grade}</span><br>
+      <br><span class="info">输入 play 再来一局</span>
+    `;
+    gameDiv.appendChild(resultDiv);
+
+    if (grade === 'S') unlockAchievement('terminal_user');
+
+    // 移除游戏输入框，恢复终端
+    setTimeout(addPrompt, 1500);
+  }
+}
+
+/* ============================================================
+   NEW FEATURE 12: ASCII ART GALLERY (ascii 命令)
+   ============================================================ */
+function getRandomASCII() {
+  const arts = [
+    `<pre class="cyan">    ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+    ⣿⣿⣿⣿⠟⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠻⣿⣿⣿
+    ⣿⣿⣿⠃⠀⠀⢀⣠⣤⣤⣤⣤⣤⣤⣄⡀⠀⠘⢿⣿
+    ⣿⣿⡇⠀⢀⣴⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦⡀⠀⢸
+    ⣿⣿⡇⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⢸
+    ⣿⣿⡇⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⢸
+    ⣿⣿⣇⠀⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠀⣸
+    ⣿⣿⣿⡄⠀⠙⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⠀⢠
+    ⣿⣿⣿⣿⣦⣀⡀⠉⠛⠿⠿⠿⠿⠛⠉⢀⣀⣴⣾⣿
+    ⣿⣿⣿⣿⣿⣿⣿⣿⣶⣶⣶⣶⣶⣶⣿⣿⣿⣿⣿⣿
+    CYBERPUNK FOREVER</pre>`,
+    `<pre class="magenta">   ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+   █░░░░░░░░░░░░░░░░░░░░░░░░░░█
+   █░█▀▀▀▀▀▀▀█░█▀▀▀▀▀▀▀█░█
+   █░█░██░██░█░█░██░██░█░█
+   █░█░██░██░█░█░██░██░█░█
+   █░█▄▄▄▄▄▄▄█░█▄▄▄▄▄▄▄█░█
+   █░░░░░░░░░░░░░░░░░░░░░░░░░░█
+   █▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀█
+   NEON CITY — EST. 2077</pre>`,
+    `<pre class="green">    _____ _   _ ____  ______ ____
+   / ____| \ | |  _ \|  ____|  _ \\
+  | |    |  \| | |_) | |__  | |_) |
+  | |    | . \` |  _ <|  __| |  _ <
+  | |____| |\  | |_) | |____| |_) |
+   \_____|_| \_|____/|______|____/
+     WELCOME TO THE MATRIX</pre>`,
+    `<pre class="cyan">   ░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░
+   ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░
+   ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░
+   ░▒▓██████▓▒░ ░▒▓████████▓▒░
+   ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░
+   ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░
+   ░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░
+   終末之劍 // TERMINAL ACCESS</pre>`,
+  ];
+  return arts[Math.floor(Math.random() * arts.length)];
+}
+
+/* ============================================================
+   NEW FEATURE 13: NEWS TICKER
+   ============================================================ */
+const NEWS_HEADLINES = [
+  '全球神经网络流量突破 1ZB/秒，赛博空间迎来新纪元',
+  '新型量子芯片发布：NEUROMANCER-X 性能提升 300%',
+  '全球开发者联合声明：代码自由是基本人权',
+  '匿名黑客组织揭露大规模数据泄露，涉 5 亿用户',
+  'AI 编程助手通过图灵测试 2.0，引发行业震动',
+  '赛博朋克 2077 重制版宣布：支持全脑机接口',
+  '终端之剑发布新开源项目，24 小时获 10k Stars',
+  '新型生物芯片可让人脑直接连接互联网',
+  '联合国通过《数字人权宣言》，全球生效',
+  '暗网市场被捣毁，加密货币暴跌 15%',
+  '全球首个太空数据中心在月球建成并投入使用',
+  '开发者在午夜的代码中发现隐藏的宇宙规律',
+  '新研究表明：凌晨 3 点写的代码 Bug 最少',
+  '赛博格权益法案通过：义体人享有完全公民权',
+  '全球咖啡因消耗量创历史新高，程序员是主力',
+];
+
+function initNewsTicker() {
+  const ticker = document.getElementById('news-ticker');
+  const text = document.getElementById('news-ticker-text');
+  const closeBtn = document.getElementById('news-ticker-close');
+  if (!ticker || !text) return;
+
+  // Random headlines
+  const shuffled = [...NEWS_HEADLINES].sort(() => Math.random() - 0.5);
+  text.textContent = shuffled.slice(0, 5).join('  ║  ');
+
+  closeBtn.addEventListener('click', () => {
+    ticker.classList.add('hidden');
+    // Shift page content slightly
+    document.querySelectorAll('.hero').forEach(el => el.style.paddingTop = 'calc(var(--nav-height) + 40px)');
+  });
+}
+
+/* ============================================================
+   NEW FEATURE 14: DOUBLE-CLICK PARTICLE EXPLOSION
+   ============================================================ */
+function initDblClickExplosion() {
+  document.addEventListener('dblclick', (e) => {
+    const x = e.clientX, y = e.clientY;
+    const count = 22;
+    const colors = ['#00ff41', '#00d4ff', '#ff00ff', '#ffaa00'];
+
+    for (let i = 0; i < count; i++) {
+      const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
+      const distance = 30 + Math.random() * 80;
+      const dx = Math.cos(angle) * distance;
+      const dy = Math.sin(angle) * distance;
+      const size = Math.random() * 4 + 2;
+      const color = colors[Math.floor(Math.random() * colors.length)];
+
+      const particle = document.createElement('div');
+      particle.className = 'dblclick-particle';
+      particle.style.cssText = `
+        left: ${x - size / 2}px; top: ${y - size / 2}px;
+        width: ${size}px; height: ${size}px;
+        background: ${color};
+        box-shadow: 0 0 ${size * 2}px ${color};
+        --dx: ${dx}px; --dy: ${dy}px;
+        animation-duration: ${Math.random() * 0.5 + 0.5}s;
+      `;
+      document.body.appendChild(particle);
+      setTimeout(() => particle.remove(), 1000);
+    }
+
+    if (soundEnabled) playBeep(200, 0.15, 'sawtooth');
   });
 }

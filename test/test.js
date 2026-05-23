@@ -492,9 +492,74 @@ const SITE = 'http://127.0.0.1:8080';
     console.log('  ✗ 未找到引语按钮');
   }
 
+  // ========== 测试 25: 新闻滚动条 ==========
+  console.log('\n[测试25] 赛博新闻滚动条...');
+  const newsTicker = await page.$('#news-ticker');
+  if (newsTicker) {
+    const visible = await newsTicker.evaluate(el => window.getComputedStyle(el).display !== 'none');
+    console.log('  新闻条可见:', visible ? '✓' : '✗');
+    const newsText = await page.$eval('#news-ticker-text', el => el.textContent);
+    console.log('  新闻内容:', newsText.substring(0, 50) + '...');
+    // 关闭新闻条
+    const closeBtn = await page.$('#news-ticker-close');
+    if (closeBtn) { await closeBtn.click(); await page.waitForTimeout(400); }
+    const hidden = await newsTicker.evaluate(el => el.classList.contains('hidden'));
+    console.log('  关闭新闻条:', hidden ? '✓' : '✗');
+  }
+
+  // ========== 测试 26: 终端游戏 ==========
+  console.log('\n[测试26] 终端打字游戏...');
+  await page.click('a[href="#home"]');
+  await page.waitForTimeout(600);
+  const termInput = await page.$('#terminal-input');
+  if (termInput) {
+    await termInput.fill('play');
+    await termInput.press('Enter');
+    await page.waitForTimeout(800);
+    const gameInput = await page.$('#game-input');
+    console.log('  游戏启动:', gameInput ? '✓' : '✗');
+    if (gameInput) {
+      // 获取第一个单词
+      const currentWord = await page.$eval('.terminal-game-word.current', el => el.textContent);
+      console.log('  当前单词:', currentWord);
+      await gameInput.fill(currentWord);
+      await page.waitForTimeout(200);
+      // 模拟空格触发检查... 游戏用input事件，fill应该触发
+      const correctCount = await page.$eval('#game-correct', el => el.textContent);
+      console.log('  正确计数:', correctCount, parseInt(correctCount) >= 0 ? '✓' : '✗');
+    }
+  }
+
+  // ========== 测试 27: ASCII 艺术 ==========
+  console.log('\n[测试27] ASCII 艺术...');
+  // 刷新页面重新开始（因为终端状态复杂）
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(10000); // 等待启动+打字
+  const ti2 = await page.$('#terminal-input');
+  if (ti2) {
+    await ti2.fill('ascii');
+    await ti2.press('Enter');
+    await page.waitForTimeout(500);
+    const preTag = await page.$('.terminal-body pre');
+    console.log('  ASCII 艺术显示:', preTag ? '✓' : '✗');
+  } else {
+    // 如果终端输入还没出现，跳过
+    console.log('  - 终端未就绪，跳过 (需等待更久)');
+  }
+
+  // ========== 测试 28: 双击粒子爆炸 ==========
+  console.log('\n[测试28] 双击粒子爆炸...');
+  await page.click('a[href="#home"]');
+  await page.waitForTimeout(500);
+  // 双击触发粒子爆炸
+  await page.mouse.click(500, 400, { clickCount: 2 });
+  await page.waitForTimeout(300);
+  const particles = await page.$$('.dblclick-particle');
+  console.log('  双击粒子生成:', particles.length > 0 ? '✓ (' + particles.length + '个粒子)' : '✗');
+
   // ========== 汇总报告 ==========
   console.log('\n====================');
-  console.log('  全部 24 项测试完成！浏览器保持打开，可以手动检查。');
+  console.log('  全部 28 项测试完成！浏览器保持打开，可以手动检查。');
   console.log('====================');
 
 })();

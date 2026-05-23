@@ -1576,6 +1576,71 @@ img { max-width: 100%; display: block; }
 .terminal-header:active { cursor: grabbing; }
 
 /* ============================================================
+   NEWS TICKER
+   ============================================================ */
+.news-ticker {
+  position: fixed; top: var(--nav-height); left: 0; right: 0; z-index: 999;
+  height: 28px;
+  background: rgba(0,20,0,0.95);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 16px;
+  overflow: hidden;
+  transition: transform 0.3s;
+}
+.news-ticker.hidden { transform: translateY(-100%); }
+.news-ticker-label {
+  font-family: var(--font-display); font-size: 0.62rem;
+  color: var(--neon-red); letter-spacing: 0.1em;
+  text-shadow: 0 0 6px var(--neon-red);
+  white-space: nowrap; flex-shrink: 0;
+}
+.news-ticker-text {
+  flex: 1; font-size: 0.68rem; color: var(--neon-primary);
+  white-space: nowrap; overflow: hidden; letter-spacing: 0.04em;
+  animation: ticker-scroll 25s linear infinite;
+}
+@keyframes ticker-scroll {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+.news-ticker-close {
+  flex-shrink: 0; width: 20px; height: 20px;
+  background: none; border: 1px solid var(--border);
+  border-radius: 50%; color: var(--text-muted);
+  cursor: pointer; font-size: 0.7rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition);
+}
+.news-ticker-close:hover { border-color: var(--neon-red); color: var(--neon-red); }
+
+/* ============================================================
+   TERMINAL GAME
+   ============================================================ */
+.terminal-game-word {
+  display: inline-block; padding: 2px 6px; margin: 2px;
+  border-radius: 3px; font-size: 0.85rem;
+  color: var(--neon-primary); transition: var(--transition);
+}
+.terminal-game-word.correct { color: #27c93f; text-shadow: 0 0 6px #27c93f; }
+.terminal-game-word.wrong { color: var(--neon-red); text-decoration: line-through; }
+.terminal-game-word.current { background: rgba(0,255,65,0.1); border: 1px solid var(--neon-primary); }
+.terminal-game-stats { margin-top: 10px; display: flex; gap: 16px; font-size: 0.8rem; }
+.terminal-game-stats span { color: var(--neon-primary); font-weight: 600; }
+
+/* ============================================================
+   DOUBLE-CLICK EXPLOSION
+   ============================================================ */
+.dblclick-particle {
+  position: fixed; z-index: 9995; pointer-events: none;
+  border-radius: 50%; animation: dblclick-fly 0.8s ease forwards;
+}
+@keyframes dblclick-fly {
+  0% { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0); }
+}
+
+/* ============================================================
    RESPONSIVE ADDITIONS
    ============================================================ */
 @media (max-width: 1024px) {
