@@ -1874,9 +1874,10 @@ function initTerminalHistory() {
   const history = [];
   let historyIdx = -1;
 
-  // 全局监听终端输入框
+  // 全局监听终端输入框的 keydown
   document.addEventListener('keydown', (e) => {
-    const inp = document.activeElement;
+    // 通过事件目标判断是否为终端输入框，不依赖 activeElement
+    const inp = e.target.closest('#terminal-input');
     if (!inp || inp.id !== 'terminal-input') return;
 
     if (e.key === 'ArrowUp') {
@@ -1885,7 +1886,6 @@ function initTerminalHistory() {
       if (historyIdx === -1) historyIdx = history.length - 1;
       else historyIdx = Math.max(0, historyIdx - 1);
       inp.value = history[historyIdx];
-      // 光标移到末尾
       setTimeout(() => { inp.selectionStart = inp.selectionEnd = inp.value.length; }, 0);
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
@@ -1897,7 +1897,6 @@ function initTerminalHistory() {
     } else if (e.key === 'Enter') {
       const cmd = inp.value.trim();
       if (cmd) {
-        // 不重复连续相同命令
         if (history.length === 0 || history[history.length - 1] !== cmd) {
           history.push(cmd);
           if (history.length > 50) history.shift();
