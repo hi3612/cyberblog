@@ -1479,6 +1479,100 @@ img { max-width: 100%; display: block; }
 }
 
 /* ============================================================
+   NETWORK NODES CANVAS
+   ============================================================ */
+#network-bg {
+  position: absolute; inset: 0; z-index: 0; opacity: 0.25;
+}
+
+/* ============================================================
+   CYBER ORACLE
+   ============================================================ */
+.cyber-oracle-btn {
+  position: fixed; bottom: 24px; left: 24px;
+  width: 48px; height: 48px;
+  border: 1px solid var(--neon-primary);
+  border-radius: 50%;
+  background: var(--bg-card);
+  color: var(--neon-primary);
+  cursor: pointer; z-index: 500;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  transition: var(--transition);
+  box-shadow: 0 0 15px var(--border-glow);
+}
+.cyber-oracle-btn:hover {
+  box-shadow: 0 0 25px var(--neon-primary);
+  transform: scale(1.1);
+}
+.cyber-oracle-btn .oracle-icon {
+  animation: oracle-spin 3s linear infinite;
+}
+@keyframes oracle-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.oracle-toast {
+  position: fixed; bottom: 90px; left: 24px; z-index: 20001;
+  max-width: 320px;
+  background: var(--bg-card); border: 2px solid var(--neon-primary);
+  border-radius: var(--radius-md); padding: 20px;
+  box-shadow: 0 0 30px rgba(0,255,65,0.2), 0 0 60px rgba(0,255,65,0.1);
+  opacity: 0; transform: translateY(10px);
+  transition: opacity 0.4s, transform 0.4s;
+  pointer-events: none;
+}
+.oracle-toast.show { opacity: 1; transform: translateY(0); }
+.oracle-toast .oracle-title {
+  font-family: var(--font-display); font-size: 0.85rem;
+  color: var(--neon-primary); letter-spacing: 0.08em;
+  margin-bottom: 8px; text-shadow: 0 0 10px var(--neon-primary);
+}
+.oracle-toast .oracle-text {
+  font-size: 0.8rem; color: var(--text-secondary);
+  line-height: 1.6; font-style: italic;
+}
+
+/* ============================================================
+   QUOTE BOX
+   ============================================================ */
+.quote-box {
+  background: rgba(0,255,65,0.03); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 16px 20px;
+  margin-top: 12px; position: relative;
+}
+.quote-box::before {
+  content: '"'; position: absolute;
+  top: -12px; left: 12px;
+  font-size: 2rem; color: var(--neon-primary);
+  font-family: serif; opacity: 0.3;
+}
+.quote-text {
+  font-size: 0.82rem; color: var(--text-secondary);
+  line-height: 1.7; font-style: italic; margin: 0;
+}
+.quote-author {
+  display: block; margin-top: 8px;
+  font-size: 0.7rem; color: var(--neon-primary);
+  letter-spacing: 0.06em;
+}
+
+/* ============================================================
+   COUNTDOWN
+   ============================================================ */
+.countdown-card .stat-number {
+  font-size: 1.4rem !important;
+}
+
+/* ============================================================
+   TERMINAL DRAG
+   ============================================================ */
+.terminal.dragging { opacity: 0.85; cursor: grabbing; }
+.terminal-header { cursor: grab; user-select: none; }
+.terminal-header:active { cursor: grabbing; }
+
+/* ============================================================
    RESPONSIVE ADDITIONS
    ============================================================ */
 @media (max-width: 1024px) {

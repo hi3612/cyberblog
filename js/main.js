@@ -53,6 +53,11 @@ document.addEventListener('DOMContentLoaded', () => {
     initPasswordStrength();
     initTextScramble();
     initCursorTrail();
+    initNetworkNodes();
+    initCyberOracle();
+    initCountdown();
+    initDraggableTerminal();
+    initRandomQuotes();
   });
 });
 
@@ -1177,4 +1182,330 @@ function spawnTrailParticle(x, y) {
   `;
   document.body.appendChild(particle);
   setTimeout(() => particle.remove(), 700);
+}
+
+/* ============================================================
+   NEW FEATURE 6: NETWORK NODES (Canvas)
+   ============================================================ */
+function initNetworkNodes() {
+  const canvas = document.getElementById('network-bg');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width = canvas.parentElement.offsetWidth;
+    canvas.height = canvas.parentElement.offsetHeight;
+  }
+  resize(); window.addEventListener('resize', resize);
+
+  const nodeCount = 35;
+  const nodes = [];
+  let mouseX = -100, mouseY = -100;
+
+  for (let i = 0; i < nodeCount; i++) {
+    nodes.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
+      radius: Math.random() * 1.5 + 0.5,
+    });
+  }
+
+  canvas.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    mouseX = e.clientX - rect.left;
+    mouseY = e.clientY - rect.top;
+  });
+
+  canvas.addEventListener('mouseleave', () => { mouseX = -100; mouseY = -100; });
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Update & draw
+    for (const node of nodes) {
+      node.x += node.vx;
+      node.y += node.vy;
+      if (node.x < 0) node.x = canvas.width;
+      if (node.x > canvas.width) node.x = 0;
+      if (node.y < 0) node.y = canvas.height;
+      if (node.y > canvas.height) node.y = 0;
+
+      // Draw node
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0, 255, 65, 0.5)';
+      ctx.fill();
+    }
+
+    // Draw connections between nearby nodes
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x;
+        const dy = nodes[i].y - nodes[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const maxDist = 150;
+
+        if (dist < maxDist) {
+          const alpha = (1 - dist / maxDist) * 0.2;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.strokeStyle = `rgba(0, 255, 65, ${alpha})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+
+    // Draw mouse connections
+    for (const node of nodes) {
+      const dx = node.x - mouseX;
+      const dy = node.y - mouseY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const maxDist = 200;
+
+      if (dist < maxDist) {
+        const alpha = (1 - dist / maxDist) * 0.5;
+        ctx.beginPath();
+        ctx.moveTo(node.x, node.y);
+        ctx.lineTo(mouseX, mouseY);
+        ctx.strokeStyle = `rgba(0, 255, 65, ${alpha})`;
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+
+        // Glow the nearby node
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.radius * 2, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0, 255, 65, ${alpha * 0.3})`;
+        ctx.fill();
+      }
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+}
+
+/* ============================================================
+   NEW FEATURE 7: CYBER ORACLE (赛博占卜)
+   ============================================================ */
+const ORACLE_PROPHECIES = [
+  '霓虹灯下，代码即是命运。你的下一个项目将在深夜 3 点诞生。',
+  'Beware of the ghost in the machine. 你的代码中有隐藏的优雅。',
+  '系统检测到你的创造力正在溢出。是时候重构那个旧项目了。',
+  'The network has a message for you: keep building, keep dreaming.',
+  '你的 Git 历史记录预示着一个伟大的开源贡献即将到来。',
+  '数据流中闪烁着一个名字... 那是你未来的项目名。',
+  '赛博空间中，孤独的程序员最强大。但别忘了偶尔离开终端。',
+  '你的下一个 Bug 修复将拯救数百名开发者。继续 Debug！',
+  'RAM 已满、CPU 过热，但你的热情从未降温。休息一下吧。',
+  '古老的主机预言：你将在 Stack Overflow 上找到终极答案。',
+  'The matrix reveals: your code style is... exceptionally clean.',
+  '警告：你的生产力即将达到峰值。请确保咖啡供应充足。',
+  '全息投影显示：一个令人兴奋的新技术正在向你靠近。',
+  '神经接口检测到灵感脉冲。大脑→键盘传输速率: 极高。',
+  'You are the chosen one. The bug was in the documentation all along.',
+  '占卜结果: 本周你的代码编译通过率将达到 99.9%。',
+];
+
+function initCyberOracle() {
+  const btn = document.getElementById('cyber-oracle');
+  const toast = document.getElementById('oracle-toast');
+  if (!btn || !toast) return;
+
+  let showing = false;
+  let hideTimer = null;
+
+  btn.addEventListener('click', () => {
+    if (soundEnabled) playBeep(1000, 0.08, 'sine');
+
+    const prophecy = ORACLE_PROPHECIES[Math.floor(Math.random() * ORACLE_PROPHECIES.length)];
+
+    // Glitch scramble reveal
+    const chars = '!@#$%^&*<>?/\\|abcdefghijklmnopqrstuvwxyz0123456789';
+    let scrambled = '';
+    for (let i = 0; i < prophecy.length; i++) {
+      scrambled += prophecy[i] === ' ' ? ' ' : chars[Math.floor(Math.random() * chars.length)];
+    }
+
+    toast.innerHTML = `
+      <div class="oracle-title">> CYBER_ORACLE // 赛博占卜</div>
+      <div class="oracle-text" id="oracle-prophecy">${scrambled}</div>
+    `;
+    toast.classList.add('show');
+
+    // Descramble animation
+    const prophecyEl = document.getElementById('oracle-prophecy');
+    let iterations = 0;
+    const maxIter = 10;
+    const interval = setInterval(() => {
+      let result = '';
+      for (let i = 0; i < prophecy.length; i++) {
+        if (i < iterations || prophecy[i] === ' ') {
+          result += prophecy[i];
+        } else {
+          result += chars[Math.floor(Math.random() * chars.length)];
+        }
+      }
+      prophecyEl.textContent = result;
+      iterations++;
+      if (iterations > maxIter) {
+        clearInterval(interval);
+        prophecyEl.textContent = prophecy;
+      }
+    }, 40);
+
+    showing = true;
+    if (hideTimer) clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => {
+      toast.classList.remove('show');
+      showing = false;
+    }, 6000);
+  });
+}
+
+/* ============================================================
+   NEW FEATURE 8: COUNTDOWN TO 2077
+   ============================================================ */
+function initCountdown() {
+  const el = document.getElementById('countdown-2077');
+  if (!el) return;
+
+  const target = new Date('2077-01-01T00:00:00+08:00');
+
+  function update() {
+    const now = new Date();
+    const diff = target - now;
+
+    if (diff <= 0) {
+      el.textContent = '已到达!';
+      return;
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const years = Math.floor(days / 365.25);
+    const remainingDays = days - Math.floor(years * 365.25);
+
+    el.textContent = years + '年' + remainingDays + '天';
+  }
+
+  update();
+  setInterval(update, 60000); // 每分钟更新
+}
+
+/* ============================================================
+   NEW FEATURE 9: DRAGGABLE TERMINAL
+   ============================================================ */
+function initDraggableTerminal() {
+  const terminal = document.getElementById('main-terminal');
+  const header = terminal ? terminal.querySelector('.terminal-header') : null;
+  if (!terminal || !header) return;
+
+  let isDragging = false;
+  let startX, startY, origLeft, origTop;
+  let hasMoved = false;
+
+  header.addEventListener('mousedown', (e) => {
+    // 不拦截终端按钮点击
+    if (e.target.classList.contains('terminal-dot')) return;
+
+    isDragging = true;
+    hasMoved = false;
+    const rect = terminal.getBoundingClientRect();
+    startX = e.clientX;
+    startY = e.clientY;
+    origLeft = rect.left;
+    origTop = rect.top;
+    terminal.style.position = 'fixed';
+    terminal.style.left = origLeft + 'px';
+    terminal.style.top = origTop + 'px';
+    terminal.style.margin = '0';
+    terminal.style.zIndex = '100';
+    terminal.classList.add('dragging');
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) hasMoved = true;
+    terminal.style.left = (origLeft + dx) + 'px';
+    terminal.style.top = (origTop + dy) + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    terminal.classList.remove('dragging');
+    // 双击重置位置
+    if (!hasMoved) {
+      // 单次点击不重置
+    }
+  });
+
+  // 双击终端头部重置位置
+  header.addEventListener('dblclick', () => {
+    terminal.style.position = '';
+    terminal.style.left = '';
+    terminal.style.top = '';
+    terminal.style.margin = '';
+    terminal.style.zIndex = '';
+  });
+}
+
+/* ============================================================
+   NEW FEATURE 10: RANDOM TECH QUOTES
+   ============================================================ */
+const TECH_QUOTES = [
+  { text: 'The best way to predict the future is to invent it.', author: 'Alan Kay' },
+  { text: 'Talk is cheap. Show me the code.', author: 'Linus Torvalds' },
+  { text: 'First, solve the problem. Then, write the code.', author: 'John Johnson' },
+  { text: 'Code is like humor. When you have to explain it, it\'s bad.', author: 'Cory House' },
+  { text: 'Simplicity is the soul of efficiency.', author: 'Austin Freeman' },
+  { text: 'The computer was born to solve problems that did not exist before.', author: 'Bill Gates' },
+  { text: 'Any fool can write code that a computer can understand. Good programmers write code that humans can understand.', author: 'Martin Fowler' },
+  { text: 'Measuring programming progress by lines of code is like measuring aircraft building progress by weight.', author: 'Bill Gates' },
+  { text: 'Debugging is twice as hard as writing the code in the first place.', author: 'Brian Kernighan' },
+  { text: 'The most dangerous phrase in the language is: We\'ve always done it this way.', author: 'Grace Hopper' },
+  { text: '在黑暗中，代码是指引我们前行的唯一光芒。', author: '终末之剑' },
+  { text: '技术不是冷冰冰的机器，而是人类想象力的延伸。', author: '终末之剑' },
+];
+
+function initRandomQuotes() {
+  const quoteText = document.getElementById('quote-text');
+  const quoteAuthor = document.getElementById('quote-author');
+  const btn = document.getElementById('btn-new-quote');
+  if (!quoteText || !btn) return;
+
+  btn.addEventListener('click', () => {
+    const quote = TECH_QUOTES[Math.floor(Math.random() * TECH_QUOTES.length)];
+
+    // 加扰动画
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let iterations = 0;
+    const maxIter = 8;
+
+    const interval = setInterval(() => {
+      let result = '';
+      for (let i = 0; i < quote.text.length; i++) {
+        if (i < iterations || quote.text[i] === ' ') {
+          result += quote.text[i];
+        } else {
+          result += chars[Math.floor(Math.random() * chars.length)];
+        }
+      }
+      quoteText.textContent = result;
+      iterations++;
+      if (iterations > maxIter) {
+        clearInterval(interval);
+        quoteText.textContent = '"' + quote.text + '"';
+      }
+    }, 40);
+
+    quoteAuthor.textContent = '— ' + quote.author;
+  });
 }

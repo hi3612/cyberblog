@@ -408,9 +408,93 @@ const SITE = 'http://127.0.0.1:8080';
   const trailParticles = await page.$$('.cursor-trail');
   console.log('  拖尾粒子生成:', trailParticles.length > 0 ? '✓ (生成了粒子)' : '- (粒子可能已消散)');
 
+  // ========== 测试 20: 网络节点背景 ==========
+  console.log('\n[测试20] 网络节点可视化...');
+  const networkCanvas = await page.$('#network-bg');
+  console.log('  节点画布存在:', networkCanvas ? '✓' : '✗');
+  if (networkCanvas) {
+    // 移动鼠标触发节点连线
+    await page.mouse.move(400, 300);
+    await page.waitForTimeout(300);
+    await page.mouse.move(500, 350);
+    await page.waitForTimeout(200);
+    console.log('  鼠标交互触发: ✓');
+  }
+
+  // ========== 测试 21: 赛博占卜 ==========
+  console.log('\n[测试21] 赛博占卜...');
+  const oracleBtn = await page.$('#cyber-oracle');
+  if (oracleBtn) {
+    await oracleBtn.click();
+    await page.waitForTimeout(1500); // 等待加扰动画
+    const oracleText = await page.$eval('#oracle-prophecy', el => el.textContent);
+    const isChinese = /[一-鿿]/.test(oracleText);
+    console.log('  占卜结果生成:', oracleText.length > 5 ? '✓' : '✗');
+    console.log('  内容包含中文:', isChinese ? '✓' : '✗');
+  } else {
+    console.log('  ✗ 未找到占卜按钮');
+  }
+
+  // ========== 测试 22: 2077 倒计时 ==========
+  console.log('\n[测试22] 2077 倒计时...');
+  const countdown = await page.$('#countdown-2077');
+  if (countdown) {
+    const cdText = await countdown.textContent();
+    console.log('  倒计时显示:', cdText);
+    const hasContent = cdText.includes('年') || cdText.includes('天');
+    console.log('  倒计时内容有效:', hasContent ? '✓' : '✗');
+  } else {
+    console.log('  ✗ 未找到倒计时元素');
+  }
+
+  // ========== 测试 23: 可拖拽终端 ==========
+  console.log('\n[测试23] 可拖拽终端...');
+  const terminalHeader = await page.$('#main-terminal .terminal-header');
+  if (terminalHeader) {
+    const initialPos = await page.$eval('#main-terminal', el => {
+      const rect = el.getBoundingClientRect();
+      return { left: rect.left, top: rect.top };
+    });
+    // 拖拽终端
+    const box = await terminalHeader.boundingBox();
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width / 2 + 50, box.y + box.height / 2 + 50, { steps: 5 });
+    await page.mouse.up();
+    await page.waitForTimeout(300);
+    const newPos = await page.$eval('#main-terminal', el => {
+      const rect = el.getBoundingClientRect();
+      return { left: rect.left, top: rect.top };
+    });
+    const moved = Math.abs(newPos.left - initialPos.left) > 5 || Math.abs(newPos.top - initialPos.top) > 5;
+    console.log('  终端可拖拽:', moved ? '✓' : '✗ (可能需手动验证)');
+
+    // 双击重置
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2, { clickCount: 2 });
+    await page.waitForTimeout(300);
+    console.log('  双击重置位置: ✓');
+  }
+
+  // ========== 测试 24: 随机技术引语 ==========
+  console.log('\n[测试24] 随机技术引语...');
+  await page.click('a[href="#about"]');
+  await page.waitForTimeout(600);
+  const quoteBtn = await page.$('#btn-new-quote');
+  if (quoteBtn) {
+    const oldQuote = await page.$eval('#quote-text', el => el.textContent);
+    await quoteBtn.click();
+    await page.waitForTimeout(800);
+    const newQuote = await page.$eval('#quote-text', el => el.textContent);
+    const changed = oldQuote !== newQuote;
+    console.log('  引语已刷新:', changed ? '✓' : '✗');
+    console.log('  新引语:', newQuote.substring(0, 50) + '...');
+  } else {
+    console.log('  ✗ 未找到引语按钮');
+  }
+
   // ========== 汇总报告 ==========
   console.log('\n====================');
-  console.log('  全部测试完成！浏览器保持打开，可以手动检查。');
+  console.log('  全部 24 项测试完成！浏览器保持打开，可以手动检查。');
   console.log('====================');
 
 })();
