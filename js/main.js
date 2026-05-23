@@ -1874,28 +1874,13 @@ function initTerminalHistory() {
   const history = [];
   let historyIdx = -1;
 
-  // 全局监听终端输入框的 keydown
+  // 捕获阶段：在 exec 替换 DOM 之前捕获 Enter 命令
   document.addEventListener('keydown', (e) => {
-    // 通过事件目标判断是否为终端输入框，不依赖 activeElement
-    const inp = e.target.closest('#terminal-input');
-    if (!inp || inp.id !== 'terminal-input') return;
+    const target = e.target;
+    if (!target || target.id !== 'terminal-input') return;
 
-    if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      if (history.length === 0) return;
-      if (historyIdx === -1) historyIdx = history.length - 1;
-      else historyIdx = Math.max(0, historyIdx - 1);
-      inp.value = history[historyIdx];
-      setTimeout(() => { inp.selectionStart = inp.selectionEnd = inp.value.length; }, 0);
-    } else if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      if (historyIdx === -1) return;
-      historyIdx++;
-      if (historyIdx >= history.length) { historyIdx = -1; inp.value = ''; }
-      else inp.value = history[historyIdx];
-      setTimeout(() => { inp.selectionStart = inp.selectionEnd = inp.value.length; }, 0);
-    } else if (e.key === 'Enter') {
-      const cmd = inp.value.trim();
+    if (e.key === 'Enter') {
+      const cmd = target.value.trim();
       if (cmd) {
         if (history.length === 0 || history[history.length - 1] !== cmd) {
           history.push(cmd);
@@ -1903,6 +1888,28 @@ function initTerminalHistory() {
         }
         historyIdx = -1;
       }
+    }
+  }, true); // capture phase — 在 exec 移除 input 之前执行
+
+  // 冒泡阶段：处理 ArrowUp/ArrowDown
+  document.addEventListener('keydown', (e) => {
+    const target = e.target;
+    if (!target || target.id !== 'terminal-input') return;
+
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (history.length === 0) return;
+      if (historyIdx === -1) historyIdx = history.length - 1;
+      else historyIdx = Math.max(0, historyIdx - 1);
+      target.value = history[historyIdx];
+      setTimeout(() => { target.selectionStart = target.selectionEnd = target.value.length; }, 0);
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (historyIdx === -1) return;
+      historyIdx++;
+      if (historyIdx >= history.length) { historyIdx = -1; target.value = ''; }
+      else target.value = history[historyIdx];
+      setTimeout(() => { target.selectionStart = target.selectionEnd = target.value.length; }, 0);
     }
   });
 }
