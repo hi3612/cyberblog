@@ -197,7 +197,7 @@ function initTypingEffect() {
     if (charIdx < text.length) {
       if (text[charIdx] === '<') { const te = text.indexOf('>', charIdx); if (te !== -1) { curLine += text.substring(charIdx, te + 1); charIdx = te + 1; el.innerHTML = prevLines() + curLine; setTimeout(typeChar, 0); return; } }
       curLine += text[charIdx]; el.innerHTML = prevLines() + curLine;
-      charIdx++; setTimeout(typeChar, Math.random() * 22 + 10);
+      charIdx++; setTimeout(typeChar, Math.random() * 12 + 5);
     } else {
       el.innerHTML = prevLines() + curLine + '<br>';
       lineIdx++; charIdx = 0; setTimeout(typeChar, delay);
@@ -879,7 +879,11 @@ function initKeyboardShortcuts() {
   document.getElementById('kb-close').addEventListener('click', () => kbModal.classList.remove('open'));
   kbModal.addEventListener('click', e => { if (e.target === kbModal) kbModal.classList.remove('open'); });
   document.addEventListener('keydown', e => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+      // 允许 ? 和 Escape 在输入框中也能触发
+      if (e.key === '?' || e.key === 'Escape') { /* 继续执行 */ }
+      else return;
+    }
     const k = e.key.toLowerCase();
     if (k === '?') { e.preventDefault(); kbModal.classList.toggle('open'); }
     else if (k === 'g') window.scrollTo({ top: 0, behavior: 'smooth' });
