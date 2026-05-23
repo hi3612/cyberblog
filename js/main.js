@@ -2069,6 +2069,7 @@ const MANUAL_DATA = [
       { key: 'cat blog', desc: '跳转到博客板块' },
       { key: 'cat about', desc: '跳转到关于板块' },
       { key: 'date', desc: '显示当前日期时间' },
+      { key: 'time', desc: '显示 8 种时间格式 (标准/UTC/Unix/二进制/十六进制等)' },
       { key: 'theme g|c|m', desc: '切换主题颜色 (绿/青/品红)' },
       { key: 'matrix', desc: '增强矩阵雨的浓度' },
       { key: 'rain 0-100', desc: '精确调节矩阵雨强度百分比' },
@@ -2115,6 +2116,7 @@ const MANUAL_DATA = [
       { key: '关闭新闻滚动条', desc: '点击 × 隐藏赛博新闻' },
       { key: '点击引语刷新按钮', desc: '随机切换 12 条技术名言 (加扰动画)' },
       { key: 'Shift+拖动鼠标', desc: '在页面上绘制霓虹光线 (放开消失)' },
+      { key: '霓虹数字钟', desc: '终端下方大型霓虹时钟 — HH:MM:SS 脉冲发光 + 日期 + 二进制 + 秒进度环' },
     ]
   },
   {
