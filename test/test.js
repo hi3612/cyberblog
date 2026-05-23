@@ -595,9 +595,10 @@ const SITE = 'http://127.0.0.1:8080';
     // 按上箭头调出历史
     const ti4 = await page.$('#terminal-input');
     if (ti4) {
-      await ti4.focus();
+      await ti4.click();
+      await page.waitForTimeout(300);
       await page.keyboard.press('ArrowUp');
-      await page.waitForTimeout(200);
+      await page.waitForTimeout(300);
       const recalled = await ti4.evaluate(el => el.value);
       console.log('  上调历史命令:', recalled === 'date' ? '✓' : '✗ (值: "' + recalled + '")');
     }
@@ -607,11 +608,13 @@ const SITE = 'http://127.0.0.1:8080';
   console.log('\n[测试31] 代码雨强度控制...');
   const ti5 = await page.$('#terminal-input');
   if (ti5) {
+    await ti5.click();
+    await page.waitForTimeout(200);
     await ti5.fill('rain 80');
     await ti5.press('Enter');
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(800);
     const output = await page.$eval('#typing-text', el => el.textContent);
-    console.log('  rain 命令响应:', output.includes('80') || output.includes('强度') ? '✓' : '✗');
+    console.log('  rain 命令响应:', output.includes('80') || output.includes('强度') ? '✓' : '✗ (输出: "' + output.substring(output.length - 50) + '")');
   }
 
   // ========== 测试 32: 签到系统 ==========

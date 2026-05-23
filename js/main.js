@@ -1951,7 +1951,6 @@ function initRainControl() {
     if (e.key === 'Enter') {
       const cmd = inp.value.trim().toLowerCase();
       if (cmd.startsWith('rain ')) {
-        e.stopPropagation();
         const val = cmd.split(' ')[1];
         if (window._setRainIntensity) {
           window._setRainIntensity(val);
