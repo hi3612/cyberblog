@@ -686,9 +686,40 @@ const SITE = 'http://127.0.0.1:8080';
   await page.waitForTimeout(400);
   console.log('  霓虹线绘制: ✓');
 
+  // ========== 测试 37: 霓虹数字钟 ==========
+  console.log('\n[测试37] 霓虹数字钟...');
+  const clockTime = await page.$('#clock-time');
+  if (clockTime) {
+    const timeText = await clockTime.textContent();
+    console.log('  时钟显示:', timeText);
+    const timeValid = /\d{2}:\d{2}:\d{2}/.test(timeText);
+    console.log('  时间格式正确:', timeValid ? '✓' : '✗');
+    const dateText = await page.$eval('#clock-date', el => el.textContent);
+    console.log('  日期显示:', dateText);
+    const binaryText = await page.$eval('#clock-binary', el => el.textContent);
+    console.log('  二进制时间:', binaryText);
+    const ringExists = await page.$('#clock-ring-sec');
+    console.log('  秒进度环:', ringExists ? '✓' : '✗');
+  } else {
+    console.log('  ✗ 未找到时钟元素');
+  }
+
+  // ========== 测试 38: time 命令 ==========
+  console.log('\n[测试38] time 终端命令...');
+  const ti8 = await page.$('#terminal-input');
+  if (ti8) {
+    await ti8.fill('time');
+    await ti8.press('Enter');
+    await page.waitForTimeout(500);
+    const output = await page.$eval('#typing-text', el => el.textContent);
+    console.log('  time 响应:', output.includes('TIME MATRIX') ? '✓' : '✗');
+    console.log('  含Unix时间戳:', output.includes('Unix') ? '✓' : '✗');
+    console.log('  含二进制:', output.includes('0') && output.includes('1') ? '✓' : '✗');
+  }
+
   // ========== 汇总报告 ==========
   console.log('\n====================');
-  console.log('  全部 36 项测试完成！浏览器保持打开，可以手动检查。');
+  console.log('  全部 38 项测试完成！浏览器保持打开，可以手动检查。');
   console.log('====================');
 
 })();
