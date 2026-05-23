@@ -1679,6 +1679,75 @@ img { max-width: 100%; display: block; }
 .cmd-item .cmd-hint { font-size: 0.68rem; color: var(--text-muted); }
 
 /* ============================================================
+   MANUAL / 功能手册
+   ============================================================ */
+.manual-category {
+  margin-bottom: 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.manual-cat-title {
+  font-family: var(--font-display); font-size: 0.82rem;
+  color: var(--neon-primary); letter-spacing: 0.08em;
+  padding: 10px 14px; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center;
+  background: rgba(0,255,65,0.03);
+  border-bottom: 1px solid var(--border);
+  transition: var(--transition);
+}
+.manual-cat-title:hover { background: rgba(0,255,65,0.06); }
+.manual-cat-title .arrow { transition: transform 0.3s; font-size: 0.7rem; }
+.manual-cat-title .arrow.open { transform: rotate(90deg); }
+.manual-cat-body { padding: 12px 14px; display: none; }
+.manual-cat-body.open { display: block; }
+.manual-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 6px 0; border-bottom: 1px solid rgba(15,45,31,0.2);
+  font-size: 0.78rem;
+}
+.manual-item:last-child { border-bottom: none; }
+.manual-item .m-key {
+  min-width: 110px; padding: 2px 6px;
+  font-family: var(--font-mono); font-size: 0.68rem;
+  color: var(--neon-primary); letter-spacing: 0.04em;
+  background: rgba(0,255,65,0.05); border-radius: 3px;
+  text-align: center; word-break: break-all;
+}
+.manual-item .m-desc {
+  color: var(--text-secondary); line-height: 1.5; flex: 1;
+}
+.manual-item .m-tag {
+  font-size: 0.58rem; padding: 1px 6px;
+  border-radius: 8px; white-space: nowrap;
+  letter-spacing: 0.04em; flex-shrink: 0;
+}
+.m-tag.cmd { border: 1px solid var(--neon-cyan); color: var(--neon-cyan); }
+.m-tag.key { border: 1px solid var(--neon-amber); color: var(--neon-amber); }
+.m-tag.ui  { border: 1px solid var(--neon-primary); color: var(--neon-primary); }
+.m-tag.easter { border: 1px solid var(--neon-magenta); color: var(--neon-magenta); }
+
+/* ============================================================
+   FULL-SCREEN GLITCH
+   ============================================================ */
+body.glitch-active {
+  animation: body-glitch 0.5s ease;
+}
+@keyframes body-glitch {
+  0% { transform: translate(0); filter: none; }
+  10% { transform: translate(-5px, 2px); filter: hue-rotate(90deg); }
+  20% { transform: translate(5px, -3px); filter: hue-rotate(-60deg); }
+  30% { transform: translate(-3px, -5px) skewX(3deg); filter: saturate(3); }
+  40% { transform: translate(3px, 3px); filter: none; }
+  50% { transform: translate(-8px, -1px); filter: hue-rotate(180deg) blur(1px); }
+  60% { transform: translate(4px, -2px); filter: none; }
+  70% { transform: translate(-2px, 4px); filter: contrast(2); }
+  80% { transform: translate(2px, -4px); filter: none; }
+  90% { transform: translate(-1px, 1px); filter: brightness(1.5); }
+  100% { transform: translate(0); filter: none; }
+}
+
+/* ============================================================
    RESPONSIVE ADDITIONS
    ============================================================ */
 @media (max-width: 1024px) {

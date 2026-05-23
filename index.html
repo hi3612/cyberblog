@@ -52,6 +52,7 @@
         <li><a href="#projects">Projects</a></li>
         <li><a href="#stats">Stats</a></li>
         <li><a href="#guestbook">Guestbook</a></li>
+        <li><a href="#" id="nav-manual">Manual</a></li>
         <li>
           <div class="theme-switcher">
             <span class="theme-dot green active" data-theme="green" title="Neon Green" role="button" tabindex="0" aria-label="绿色主题"></span>
@@ -326,6 +327,14 @@
     </div>
   </div>
 
+  <!-- Manual / 功能手册 Modal -->
+  <div id="manual-modal" class="modal-overlay">
+    <div class="modal" style="max-width:780px;max-height:90vh;">
+      <button id="manual-close" class="modal-close">&times;</button>
+      <div class="modal-body" id="manual-body"><!-- JS render --></div>
+    </div>
+  </div>
+
   <!-- Keyboard Shortcuts Modal -->
   <div id="kb-modal" class="modal-overlay">
     <div class="modal" style="max-width:560px;">
@@ -343,6 +352,8 @@
       </div>
     </div>
   </div>
+
+  <canvas id="neon-canvas" style="position:fixed;inset:0;z-index:9994;pointer-events:none;opacity:0;transition:opacity 0.3s;"></canvas>
 
   <script src="js/posts.js"></script>
   <script src="js/main.js"></script>

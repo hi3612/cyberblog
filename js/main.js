@@ -65,6 +65,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initRainControl();
     initCheckIn();
     initTimedTheme();
+    initManual();
+    initNeonDrawing();
   });
 });
 
@@ -251,7 +253,7 @@ function initTypingEffect() {
     let result = '';
     if (!cmd) { result = ''; }
     else if (cmd === 'help') {
-      result = '<span class="cyan">命令列表:</span><br><span class="cmd-echo">help</span> / <span class="cmd-echo">whoami</span> / <span class="cmd-echo">neofetch</span> / <span class="cmd-echo">ls</span> / <span class="cmd-echo">cat blog|about</span> / <span class="cmd-echo">date</span> / <span class="cmd-echo">theme g|c|m</span> / <span class="cmd-echo">matrix</span> / <span class="cmd-echo">ascii</span> / <span class="cmd-echo">play</span> / <span class="cmd-echo">rain 0-100</span> / <span class="cmd-echo">checkin</span> / <span class="cmd-echo">clear</span> / <span class="cmd-echo">sudo</span> / <span class="cmd-echo">exit</span>';
+      result = '<span class="cyan">命令列表:</span><br><span class="cmd-echo">help</span> / <span class="cmd-echo">whoami</span> / <span class="cmd-echo">neofetch</span> / <span class="cmd-echo">ls</span> / <span class="cmd-echo">cat blog|about</span> / <span class="cmd-echo">date</span> / <span class="cmd-echo">theme g|c|m</span> / <span class="cmd-echo">matrix</span> / <span class="cmd-echo">ascii</span> / <span class="cmd-echo">play</span> / <span class="cmd-echo">rain 0-100</span> / <span class="cmd-echo">checkin</span> / <span class="cmd-echo">glitch</span> / <span class="cmd-echo">manual</span> / <span class="cmd-echo">clear</span> / <span class="cmd-echo">sudo</span> / <span class="cmd-echo">exit</span>';
     } else if (cmd === 'whoami') { result = '<span class="cyan">终末之剑</span> — 全栈开发者 / 开源贡献者 / 赛博朋克爱好者'; }
     else if (cmd === 'neofetch') {
       const d = new Date();
@@ -271,6 +273,8 @@ function initTypingEffect() {
     else if (cmd === 'play') { startTerminalGame(el); return; }
     else if (cmd === 'ascii') { result = getRandomASCII(); }
     else if (cmd === 'checkin') { doCheckIn(); result = '<span class="info">签到处理中...</span>'; }
+    else if (cmd === 'manual') { showManual(); result = '<span class="info">正在打开功能手册...</span>'; }
+    else if (cmd === 'glitch') { triggerBodyGlitch(); result = '<span class="magenta">!!! SYSTEM MALFUNCTION !!!</span>'; }
     else if (cmd.startsWith('rain ')) {
       const v = cmd.split(' ')[1];
       const ok = window._setRainIntensity ? window._setRainIntensity(v) : false;
@@ -2046,4 +2050,205 @@ function initTimedTheme() {
       localStorage.setItem('cyberblog-theme', t);
     }
   }, 3600000);
+}
+
+/* ============================================================
+   NEW FEATURE 20: FUNCTION MANUAL / 功能手册
+   ============================================================ */
+const MANUAL_DATA = [
+  {
+    category: '终端命令 (Terminal Commands)',
+    tag: 'cmd',
+    items: [
+      { key: 'help', desc: '显示所有可用命令列表' },
+      { key: 'whoami', desc: '显示个人身份信息' },
+      { key: 'neofetch', desc: '显示赛博朋克风格系统信息' },
+      { key: 'ls', desc: '列出网站各板块目录' },
+      { key: 'cat blog', desc: '跳转到博客板块' },
+      { key: 'cat about', desc: '跳转到关于板块' },
+      { key: 'date', desc: '显示当前日期时间' },
+      { key: 'theme g|c|m', desc: '切换主题颜色 (绿/青/品红)' },
+      { key: 'matrix', desc: '增强矩阵雨的浓度' },
+      { key: 'rain 0-100', desc: '精确调节矩阵雨强度百分比' },
+      { key: 'ascii', desc: '显示随机 ASCII 赛博朋克艺术画' },
+      { key: 'play', desc: '启动 30 秒限时打字速度挑战游戏' },
+      { key: 'checkin', desc: '每日签到打卡，连续签到有成就' },
+      { key: 'glitch', desc: '触发全屏故障抖动特效' },
+      { key: 'manual', desc: '打开本功能手册' },
+      { key: 'clear', desc: '清除终端屏幕' },
+      { key: 'sudo', desc: '尝试获取管理员权限 (彩蛋)' },
+      { key: 'exit', desc: '退出终端会话' },
+    ]
+  },
+  {
+    category: '键盘快捷键 (Keyboard Shortcuts)',
+    tag: 'key',
+    items: [
+      { key: '?', desc: '显示 / 隐藏快捷键帮助面板' },
+      { key: 'Esc', desc: '关闭所有弹窗和模态框' },
+      { key: '1-5', desc: '快速跳转到第 1-5 个板块' },
+      { key: 'T', desc: '循环切换主题颜色' },
+      { key: 'G', desc: '回到页面顶部' },
+      { key: 'L', desc: '在文章详情中点赞当前文章' },
+      { key: 'Ctrl+K', desc: '打开 VS Code 风格快速命令面板' },
+      { key: '终端内 ↑↓', desc: '浏览终端命令历史记录' },
+    ]
+  },
+  {
+    category: '界面交互 (UI Interactions)',
+    tag: 'ui',
+    items: [
+      { key: '点击博客卡片', desc: '打开文章详情，含目录/代码复制/点赞/评论/分享/相关推荐' },
+      { key: '鼠标悬停卡片', desc: '3D 透视倾斜效果' },
+      { key: '拖拽终端标题栏', desc: '拖动终端窗口到任意位置' },
+      { key: '双击终端标题栏', desc: '重置终端窗口位置' },
+      { key: '双击页面任意位置', desc: '触发彩色粒子爆炸特效' },
+      { key: '点击左下角 ★ 按钮', desc: '赛博占卜，随机预言 + 文字加扰揭示动画' },
+      { key: '点击导航栏色点', desc: '切换绿/青/品红主题' },
+      { key: '点击用户头像', desc: '展开用户菜单 (阅读记录/收藏/退出)' },
+      { key: '点击 ♪ 音效按钮', desc: '开关全局音效反馈' },
+      { key: '博客搜索框', desc: '按标题/内容/标签实时过滤文章' },
+      { key: '分类标签按钮', desc: '按前端/职业/设计分类筛选文章' },
+      { key: '回到顶部按钮', desc: '带环形滚动进度指示器' },
+      { key: '关闭新闻滚动条', desc: '点击 × 隐藏赛博新闻' },
+      { key: '点击引语刷新按钮', desc: '随机切换 12 条技术名言 (加扰动画)' },
+      { key: 'Shift+拖动鼠标', desc: '在页面上绘制霓虹光线 (放开消失)' },
+    ]
+  },
+  {
+    category: '隐藏彩蛋 (Easter Eggs)',
+    tag: 'easter',
+    items: [
+      { key: 'Konami Code', desc: '按 ↑↑↓↓←→←→BA 触发隐藏赛博朋克模式' },
+      { key: '终端 sudo 命令', desc: '尝试获取 root 权限的幽默回应' },
+      { key: '夜猫子成就', desc: '凌晨 0-5 点访问网站自动解锁' },
+      { key: '探索者成就', desc: '连续签到 7 天解锁' },
+    ]
+  },
+];
+
+function showManual() {
+  const modal = document.getElementById('manual-modal');
+  const body = document.getElementById('manual-body');
+  if (!modal || !body) return;
+
+  body.innerHTML = `
+    <h2 style="font-family:var(--font-display);color:var(--neon-primary);margin-bottom:4px;">> FUNCTION_MANUAL</h2>
+    <p style="font-size:0.72rem;color:var(--text-muted);margin-bottom:20px;">终末之剑 · CYBER//BLOG 完整功能手册 v4.7 — 共 ${MANUAL_DATA.reduce((s,c) => s + c.items.length, 0)} 项功能</p>
+    ${MANUAL_DATA.map((cat, ci) => `
+      <div class="manual-category">
+        <div class="manual-cat-title" data-cat="${ci}">
+          <span>${cat.category}</span>
+          <span class="arrow open">▶</span>
+        </div>
+        <div class="manual-cat-body open">
+          ${cat.items.map(item => `
+            <div class="manual-item">
+              <span class="m-key">${item.key}</span>
+              <span class="m-desc">${item.desc}</span>
+              <span class="m-tag ${cat.tag}">${cat.tag === 'cmd' ? '终端' : cat.tag === 'key' ? '快捷键' : cat.tag === 'ui' ? '界面' : '彩蛋'}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `).join('')}
+  `;
+
+  // Collapsible categories
+  body.querySelectorAll('.manual-cat-title').forEach(title => {
+    title.addEventListener('click', () => {
+      const catIdx = title.dataset.cat;
+      const catBody = body.querySelectorAll('.manual-cat-body')[catIdx];
+      const arrow = title.querySelector('.arrow');
+      catBody.classList.toggle('open');
+      arrow.classList.toggle('open');
+    });
+  });
+
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function initManual() {
+  const modal = document.getElementById('manual-modal');
+  const closeBtn = document.getElementById('manual-close');
+  const navLink = document.getElementById('nav-manual');
+
+  if (closeBtn) closeBtn.addEventListener('click', () => { modal.classList.remove('open'); document.body.style.overflow = ''; });
+  if (modal) modal.addEventListener('click', e => { if (e.target === modal) { modal.classList.remove('open'); document.body.style.overflow = ''; } });
+  if (navLink) navLink.addEventListener('click', e => { e.preventDefault(); showManual(); });
+}
+
+/* ============================================================
+   NEW FEATURE 21: BODY GLITCH (glitch 命令)
+   ============================================================ */
+function triggerBodyGlitch() {
+  document.body.classList.add('glitch-active');
+  if (soundEnabled) playBeep(100, 0.3, 'sawtooth');
+  setTimeout(() => document.body.classList.remove('glitch-active'), 500);
+}
+
+/* ============================================================
+   NEW FEATURE 22: NEON DRAWING (Shift+拖动鼠标)
+   ============================================================ */
+function initNeonDrawing() {
+  const canvas = document.getElementById('neon-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+
+  let drawing = false;
+  let lastX = 0, lastY = 0;
+  let strokes = [];
+  const maxStrokes = 15;
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Shift' && !drawing) {
+      canvas.style.opacity = '1';
+      canvas.style.pointerEvents = 'auto';
+    }
+  });
+
+  document.addEventListener('keyup', (e) => {
+    if (e.key === 'Shift') {
+      drawing = false;
+      // 渐变消失
+      canvas.style.opacity = '0';
+      canvas.style.pointerEvents = 'none';
+      setTimeout(() => { ctx.clearRect(0, 0, canvas.width, canvas.height); strokes = []; }, 300);
+    }
+  });
+
+  canvas.addEventListener('mousedown', (e) => {
+    if (!e.shiftKey) return;
+    drawing = true;
+    lastX = e.clientX;
+    lastY = e.clientY;
+    strokes.push([]);
+    if (strokes.length > maxStrokes) strokes.shift();
+  });
+
+  canvas.addEventListener('mousemove', (e) => {
+    if (!drawing) return;
+    const x = e.clientX, y = e.clientY;
+
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(x, y);
+    ctx.strokeStyle = '#00ff41';
+    ctx.lineWidth = 2;
+    ctx.shadowColor = '#00ff41';
+    ctx.shadowBlur = 10;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    lastX = x;
+    lastY = y;
+  });
+
+  canvas.addEventListener('mouseup', () => { drawing = false; });
+  canvas.addEventListener('mouseleave', () => { drawing = false; });
 }
