@@ -56,6 +56,12 @@ function initBootSequence(callback) {
   const screen = document.getElementById('boot-screen');
   const log = document.getElementById('boot-log');
   if (!screen || !log) { callback(); return; }
+
+  // Safety timeout: force dismiss after 6 seconds
+  const safetyTimer = setTimeout(() => {
+    screen.classList.add('done');
+    callback();
+  }, 6000);
   const lines = [
     { t: 'CYBER//BLOG Firmware v4.7.1', c: '' },
     { t: '', c: '' },
@@ -78,7 +84,11 @@ function initBootSequence(callback) {
   ];
   let i = 0;
   function next() {
-    if (i >= lines.length) { setTimeout(() => { screen.classList.add('done'); setTimeout(callback, 600); }, 300); return; }
+    if (i >= lines.length) {
+      clearTimeout(safetyTimer);
+      setTimeout(() => { screen.classList.add('done'); setTimeout(callback, 600); }, 300);
+      return;
+    }
     const { t, c } = lines[i];
     const d = document.createElement('div');
     if (c) d.className = c;
