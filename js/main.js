@@ -873,7 +873,7 @@ function initLiveClock() {
 
 /* --- Stats Counter --- */
 function initStatsCounter() {
-  document.querySelectorAll('.stat-number').forEach(el => {
+  document.querySelectorAll('.stat-number[data-target]').forEach(el => {
     const obs = new IntersectionObserver(entries => {
       entries.forEach(e => { if (e.isIntersecting) { const t = parseInt(el.dataset.target); animateNum(el, t); obs.unobserve(el); } });
     }, { threshold: 0.5 });
