@@ -595,26 +595,10 @@ const SITE = 'http://127.0.0.1:8080';
     // 按上箭头调出历史
     const ti4 = await page.$('#terminal-input');
     if (ti4) {
-      // 直接在元素上派发 keydown 事件，不依赖焦点
-      await ti4.focus();
-      await page.waitForTimeout(200);
       await ti4.press('ArrowUp');
-      await page.waitForTimeout(400);
+      await page.waitForTimeout(300);
       const recalled = await ti4.evaluate(el => el.value);
-      console.log('  上调历史命令:', recalled === 'date' ? '✓' : '✗ (值: "' + recalled + '")');
-      // 如果还是空，尝试通过 evaluate 直接注入
-      if (!recalled) {
-        const hasHistory = await page.evaluate(() => {
-          // 检查闭包中的history — 无法直接访问，尝试通过dispatchEvent
-          const inp = document.getElementById('terminal-input');
-          if (inp) {
-            const ev = new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true });
-            inp.dispatchEvent(ev);
-            return inp.value;
-          }
-          return 'no-input';
-        });
-        console.log('  重试结果:', hasHistory !== '' ? '✓ (值: "' + hasHistory + '")' : '✗');
+      console.log('  上调历史命令:', recalled !== '' ? '✓ (值: "' + recalled + '")' : '✗');
     }
   }
 
