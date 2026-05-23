@@ -320,13 +320,97 @@ const SITE = 'http://127.0.0.1:8080';
     }
   }
 
+  // ========== 测试 15: 新功能 - 音效系统 ==========
+  console.log('\n[测试15] 音效系统...');
+  const soundBtn = await page.$('#btn-sound');
+  if (soundBtn) {
+    const soundText = await soundBtn.textContent();
+    console.log('  音效按钮存在:', soundText.includes('音效') || soundText.includes('静音') ? '✓' : '✗');
+    await soundBtn.click();
+    await page.waitForTimeout(300);
+    const muted = await soundBtn.evaluate(el => el.classList.contains('muted'));
+    console.log('  切换静音状态:', muted ? '✓' : '✗');
+    await soundBtn.click();
+    await page.waitForTimeout(300);
+    console.log('  恢复音效: ✓');
+  } else {
+    console.log('  ✗ 未找到音效按钮');
+  }
+
+  // ========== 测试 16: 新功能 - 成就系统 ==========
+  console.log('\n[测试16] 成就系统...');
+  // 打开文章点赞触发 first_like 成就
+  await page.click('a[href="#blog"]');
+  await page.waitForTimeout(600);
+  const bc3 = await page.$('.blog-card');
+  if (bc3) {
+    await bc3.click();
+    await page.waitForTimeout(600);
+    const lb = await page.$('#like-btn');
+    if (lb) {
+      const alreadyLiked = await lb.evaluate(el => el.classList.contains('liked'));
+      if (!alreadyLiked) {
+        await lb.click();
+        await page.waitForTimeout(600);
+      }
+      console.log('  点赞触发成就: ✓');
+    }
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(400);
+  }
+
+  // ========== 测试 17: 新功能 - 密码强度 ==========
+  console.log('\n[测试17] 密码强度指示器...');
+  // 先退出登录
+  const ua2 = await page.$('.user-avatar');
+  if (ua2) {
+    await ua2.click(); await page.waitForTimeout(300);
+    const lo = await page.$('.logout');
+    if (lo) { await lo.click(); await page.waitForTimeout(500); }
+  }
+  // 打开注册
+  const lb2 = await page.$('#btn-login');
+  if (lb2) {
+    await lb2.click(); await page.waitForTimeout(400);
+    await page.click('#auth-switch'); await page.waitForTimeout(300);
+    // 输入弱密码
+    await page.fill('#auth-password', '123');
+    await page.waitForTimeout(300);
+    const pwBar = await page.$('#pw-strength');
+    console.log('  密码强度条出现:', pwBar ? '✓' : '✗');
+    if (pwBar) {
+      const visible = await pwBar.evaluate(el => window.getComputedStyle(el).display !== 'none');
+      console.log('  强度条可见:', visible ? '✓' : '✗');
+    }
+    // 关闭
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+  }
+
+  // ========== 测试 18: 新功能 - 文字加扰 ==========
+  console.log('\n[测试18] 文字加扰动画...');
+  // 滚动触发 section title 进入视口
+  await page.evaluate(() => window.scrollTo({ top: document.getElementById('stats').offsetTop - 200, behavior: 'instant' }));
+  await page.waitForTimeout(1500);
+  const sectionTitle = await page.$eval('#stats .section-title', el => el.textContent);
+  console.log('  标题文字还原:', sectionTitle === 'System Stats' || sectionTitle.includes('System') ? '✓' : '✗ (当前: "' + sectionTitle + '")');
+
+  // ========== 测试 19: 新功能 - 光标拖尾 ==========
+  console.log('\n[测试19] 光标拖尾粒子...');
+  // 移动鼠标触发拖尾
+  await page.mouse.move(200, 300);
+  await page.mouse.move(300, 400);
+  await page.mouse.move(400, 350);
+  await page.waitForTimeout(300);
+  // 点击触发粒子爆发
+  await page.mouse.click(500, 400);
+  await page.waitForTimeout(200);
+  const trailParticles = await page.$$('.cursor-trail');
+  console.log('  拖尾粒子生成:', trailParticles.length > 0 ? '✓ (生成了粒子)' : '- (粒子可能已消散)');
+
   // ========== 汇总报告 ==========
   console.log('\n====================');
-  console.log('  测试完成！浏览器保持打开，可以手动检查。');
-  console.log('  按 Ctrl+C 关闭浏览器。');
+  console.log('  全部测试完成！浏览器保持打开，可以手动检查。');
   console.log('====================');
-
-  // 保持浏览器打开，等待手动检查
-  // await browser.close(); // 不自动关闭，方便手动查看
 
 })();

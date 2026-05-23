@@ -48,6 +48,11 @@ document.addEventListener('DOMContentLoaded', () => {
     initRSS();
     initGlobalModals();
     initCardTilt();
+    initSoundSystem();
+    initAchievementSystem();
+    initPasswordStrength();
+    initTextScramble();
+    initCursorTrail();
   });
 });
 
@@ -296,7 +301,7 @@ function initThemeSwitcher() {
   const saved = localStorage.getItem('cyberblog-theme') || 'green';
   if (saved !== 'green') document.documentElement.setAttribute('data-theme', saved);
   update(saved);
-  dots.forEach(d => d.addEventListener('click', () => { const t = d.dataset.theme; if (t === 'green') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', t); localStorage.setItem('cyberblog-theme', t); update(t); }));
+  dots.forEach(d => d.addEventListener('click', () => { const t = d.dataset.theme; if (t === 'green') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', t); localStorage.setItem('cyberblog-theme', t); update(t); unlockAchievement('theme_switch'); }));
   function update(t) { dots.forEach(d => d.classList.remove('active')); const a = document.querySelector(`.theme-dot.${t}`); if (a) a.classList.add('active'); }
 }
 
@@ -387,6 +392,7 @@ function initAuthUI() {
       document.body.style.overflow = '';
       renderAuthArea();
       showToast('注册成功！欢迎 ' + username);
+      unlockAchievement('first_login');
     } else {
       const found = users.find(u => u.username === username && u.password === password);
       if (!found) { errEl.textContent = '用户名或密码错误'; errEl.style.display = 'block'; return; }
@@ -395,6 +401,7 @@ function initAuthUI() {
       document.body.style.overflow = '';
       renderAuthArea();
       showToast('欢迎回来，' + username);
+      unlockAchievement('first_login');
     }
   });
 
@@ -557,6 +564,7 @@ function initBlogSection() {
         comments.push({ id: Date.now(), postId: post.id, userId: user.id, username: user.username, text, date: new Date().toISOString() });
         DB.saveComments(comments);
         textarea.value = '';
+        unlockAchievement('first_comment');
         // Refresh only the comments list, preserving the form
         const commentsList = modalBody.querySelector('.comments-list');
         if (commentsList) {
@@ -590,7 +598,7 @@ function toggleLike(postId, btn) {
   const likes = DB.getLikes();
   if (!likes[postId]) likes[postId] = [];
   const idx = likes[postId].indexOf(user.id);
-  if (idx === -1) { likes[postId].push(user.id); btn.classList.add('liked'); btn.querySelector('.like-icon').innerHTML = '&#9829;'; }
+  if (idx === -1) { likes[postId].push(user.id); btn.classList.add('liked'); btn.querySelector('.like-icon').innerHTML = '&#9829;'; unlockAchievement('first_like'); }
   else { likes[postId].splice(idx, 1); btn.classList.remove('liked'); btn.querySelector('.like-icon').innerHTML = '&#9825;'; }
   DB.saveLikes(likes);
   const count = btn.querySelector('#like-count'); if (count) count.textContent = likes[postId].length;
@@ -707,6 +715,7 @@ function initGuestbook() {
     messages.unshift({ id: Date.now(), userId: user.id, author, text, date: new Date().toISOString() });
     DB.saveMessages(messages);
     textEl.value = '';
+    unlockAchievement('guestbook_msg');
     renderMessages();
   });
 
@@ -917,6 +926,7 @@ function initKonamiCode() {
 
 function triggerEgg() {
   const t = document.createElement('div'); t.className = 'easter-egg-toast'; t.textContent = '>>> CYBERPUNK MODE ACTIVATED <<<'; document.body.appendChild(t); setTimeout(() => t.remove(), 3500);
+  unlockAchievement('konami');
   document.body.style.transition = 'background 0.2s'; document.body.style.background = '#ff00ff'; setTimeout(() => { document.body.style.background = ''; document.body.style.transition = ''; }, 200);
 }
 
@@ -928,4 +938,243 @@ function initRSS() {
     const rss = `<?xml version="1.0"?><rss version="2.0"><channel><title>终末之剑 | CYBER//BLOG</title><link>${location.origin}${location.pathname}</link><description>赛博朋克个人博客</description><language>zh-CN</language>${items}</channel></rss>`;
     const url = URL.createObjectURL(new Blob([rss], { type: 'application/rss+xml' })); const w = window.open(url, '_blank'); setTimeout(() => URL.revokeObjectURL(url), 5000);
   }));
+}
+
+/* ============================================================
+   NEW FEATURE 1: SOUND SYSTEM (Web Audio API)
+   ============================================================ */
+let soundEnabled = localStorage.getItem('cb-sound') !== 'off';
+
+function initSoundSystem() {
+  const btn = document.getElementById('btn-sound');
+  if (!btn) return;
+
+  updateSoundBtn();
+
+  btn.addEventListener('click', () => {
+    soundEnabled = !soundEnabled;
+    localStorage.setItem('cb-sound', soundEnabled ? 'on' : 'off');
+    updateSoundBtn();
+    if (soundEnabled) playBeep(800, 0.05, 'sine');
+  });
+
+  function updateSoundBtn() {
+    btn.textContent = soundEnabled ? '♪ 音效' : '♪ 静音';
+    btn.classList.toggle('muted', !soundEnabled);
+  }
+
+  // Add click sounds to interactive elements
+  document.addEventListener('click', (e) => {
+    if (!soundEnabled) return;
+    const target = e.target;
+    if (target.closest('button') || target.closest('.btn') || target.closest('a[href]')) {
+      playBeep(600, 0.04, 'square');
+    }
+    if (target.closest('.blog-card')) {
+      playBeep(800, 0.06, 'sine');
+    }
+  });
+
+  // Hover sounds on cards
+  document.addEventListener('mouseenter', (e) => {
+    if (!soundEnabled) return;
+    if (e.target.closest('.blog-card') || e.target.closest('.project-card')) {
+      playBeep(1200, 0.02, 'sine');
+    }
+  }, true);
+}
+
+function playBeep(freq, duration, type) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.06, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration);
+  } catch (e) { /* 静默处理音频错误 */ }
+}
+
+/* ============================================================
+   NEW FEATURE 2: ACHIEVEMENT SYSTEM
+   ============================================================ */
+const ACHIEVEMENTS = [
+  { id: 'first_login', title: '初次登录', desc: '成功注册并登录账号', icon: '🔑' },
+  { id: 'first_comment', title: '畅所欲言', desc: '发表了第一条评论', icon: '💬' },
+  { id: 'first_like', title: '慧眼识珠', desc: '给文章点了第一个赞', icon: '❤️' },
+  { id: 'theme_switch', title: '色彩大师', desc: '切换了网站主题颜色', icon: '🎨' },
+  { id: 'terminal_user', title: '黑客入门', desc: '在终端中输入了命令', icon: '💻' },
+  { id: 'guestbook_msg', title: '到此一游', desc: '在留言板留下了足迹', icon: '📝' },
+  { id: 'konami', title: '作弊码发现者', desc: '找到了隐藏的 Konami 彩蛋', icon: '🎮' },
+  { id: 'night_owl', title: '夜猫子', desc: '在深夜访问了网站', icon: '🦉' },
+  { id: 'explorer', title: '探索者', desc: '浏览了全部 5 篇文章', icon: '🔍' },
+];
+
+let unlockedAchievements = JSON.parse(localStorage.getItem('cb-achievements') || '[]');
+
+function unlockAchievement(id) {
+  if (unlockedAchievements.includes(id)) return;
+  const ach = ACHIEVEMENTS.find(a => a.id === id);
+  if (!ach) return;
+  unlockedAchievements.push(id);
+  localStorage.setItem('cb-achievements', JSON.stringify(unlockedAchievements));
+  showAchievementToast(ach);
+}
+
+function showAchievementToast(ach) {
+  const toast = document.createElement('div');
+  toast.className = 'achievement-toast';
+  toast.innerHTML = `
+    <div class="ach-icon">${ach.icon}</div>
+    <div class="ach-title">🏆 成就解锁: ${ach.title}</div>
+    <div class="ach-desc">${ach.desc}</div>
+  `;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3500);
+}
+
+function initAchievementSystem() {
+  // 检查首次登录（在登录成功时触发，见 initAuthUI）
+  // 检查主题切换（在 initThemeSwitcher 中触发）
+  // 检查时间
+  const hour = new Date().getHours();
+  if (hour >= 0 && hour < 5) {
+    setTimeout(() => unlockAchievement('night_owl'), 8000);
+  }
+
+  // 将成就系统挂载到全局
+  window._unlockAchievement = unlockAchievement;
+
+  // 检查之前是否在终端用过命令
+  document.addEventListener('keydown', function trackTerminal(e) {
+    if (e.target.id === 'terminal-input' && e.key === 'Enter' && e.target.value.trim()) {
+      unlockAchievement('terminal_user');
+      document.removeEventListener('keydown', trackTerminal);
+    }
+  });
+}
+
+/* ============================================================
+   NEW FEATURE 3: PASSWORD STRENGTH METER
+   ============================================================ */
+function initPasswordStrength() {
+  const pwInput = document.getElementById('auth-password');
+  const barFill = document.getElementById('pw-bar-fill');
+  const pwText = document.getElementById('pw-text');
+  const strengthEl = document.getElementById('pw-strength');
+  const confirmField = document.getElementById('auth-confirm-field');
+
+  if (!pwInput || !barFill) return;
+
+  pwInput.addEventListener('input', () => {
+    const pw = pwInput.value;
+    // 只在注册模式（确认密码可见）时显示强度条
+    if (confirmField && confirmField.style.display === 'none') {
+      strengthEl.style.display = 'none';
+      return;
+    }
+    if (!pw) { strengthEl.style.display = 'none'; return; }
+    strengthEl.style.display = 'block';
+
+    let score = 0;
+    if (pw.length >= 4) score++;
+    if (pw.length >= 8) score++;
+    if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++;
+    if (/\d/.test(pw)) score++;
+    if (/[^a-zA-Z0-9]/.test(pw)) score++;
+
+    const levels = ['weak', 'fair', 'good', 'strong', 'strong'];
+    const labels = ['太弱了', '一般般', '还不错', '很强', '极强'];
+    const idx = Math.min(score, 4);
+
+    barFill.className = 'pw-bar-fill ' + levels[idx];
+    pwText.textContent = labels[idx];
+    pwText.style.color = idx <= 1 ? 'var(--neon-red)' : idx === 2 ? 'var(--neon-cyan)' : 'var(--neon-primary)';
+  });
+}
+
+/* ============================================================
+   NEW FEATURE 4: TEXT SCRAMBLE ON SECTION TITLES
+   ============================================================ */
+function initTextScramble() {
+  const titles = document.querySelectorAll('.section-title, .glitch-title');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        scrambleText(entry.target);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.6 });
+
+  titles.forEach(t => observer.observe(t));
+}
+
+function scrambleText(el) {
+  const original = el.textContent;
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*<>?|/\\';
+  let iterations = 0;
+  const maxIterations = 12;
+
+  const interval = setInterval(() => {
+    el.textContent = original.split('').map((char, i) => {
+      if (i < iterations || char === ' ') return original[i];
+      return chars[Math.floor(Math.random() * chars.length)];
+    }).join('');
+    iterations++;
+    if (iterations >= maxIterations) {
+      clearInterval(interval);
+      el.textContent = original;
+    }
+  }, 50);
+}
+
+/* ============================================================
+   NEW FEATURE 5: CURSOR TRAIL PARTICLES
+   ============================================================ */
+function initCursorTrail() {
+  let lastX = 0, lastY = 0;
+
+  document.addEventListener('mousemove', (e) => {
+    // 只在鼠标移动足够距离时生成拖尾粒子
+    const dx = e.clientX - lastX;
+    const dy = e.clientY - lastY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist > 30) {
+      spawnTrailParticle(e.clientX, e.clientY);
+      lastX = e.clientX;
+      lastY = e.clientY;
+    }
+  });
+
+  // 点击爆发粒子
+  document.addEventListener('click', (e) => {
+    for (let i = 0; i < 8; i++) {
+      const angle = (Math.PI * 2 * i) / 8;
+      const dist = 20 + Math.random() * 30;
+      const x = e.clientX + Math.cos(angle) * dist;
+      const y = e.clientY + Math.sin(angle) * dist;
+      spawnTrailParticle(x, y);
+    }
+  });
+}
+
+function spawnTrailParticle(x, y) {
+  const particle = document.createElement('div');
+  particle.className = 'cursor-trail';
+  const size = Math.random() * 3 + 2;
+  particle.style.cssText = `
+    left: ${x - size / 2}px; top: ${y - size / 2}px;
+    width: ${size}px; height: ${size}px;
+    animation-duration: ${Math.random() * 0.4 + 0.3}s;
+  `;
+  document.body.appendChild(particle);
+  setTimeout(() => particle.remove(), 700);
 }
