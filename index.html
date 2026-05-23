@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <!-- Ambient Layers -->
+  <div class="vignette"></div>
 
   <!-- ============================================================
        NAVIGATION
@@ -50,7 +52,8 @@
           <span class="terminal-dot red"></span>
           <span class="terminal-dot yellow"></span>
           <span class="terminal-dot green"></span>
-          <span class="terminal-title">visitor@cyberblog:~</span>
+          <span class="terminal-title" style="margin-left:12px;">root@cyberblog:~</span>
+          <span class="terminal-title" style="margin-left:auto;">[LAT: 31.23 | LNG: 121.47 | UTC+8]</span>
         </div>
         <div class="terminal-body">
           <div id="typing-text"></div>
@@ -82,8 +85,7 @@
 
       <div class="blog-controls fade-in">
         <div class="blog-search">
-          <span class="search-icon">&#8981;</span>
-          <input type="text" id="blog-search-input" placeholder="搜索文章标题、内容或标签...">
+          <input type="text" id="blog-search-input" placeholder="> search articles...">
         </div>
         <div class="blog-filters">
           <button class="filter-btn active" data-filter="all">全部</button>
@@ -98,6 +100,12 @@
       </div>
     </div>
   </section>
+
+  <div class="deco-divider fade-in">
+    <div class="line-h"></div>
+    <div class="diamond"></div>
+    <div class="line-h"></div>
+  </div>
 
   <!-- ============================================================
        ABOUT
@@ -157,6 +165,12 @@
       </div>
     </div>
   </section>
+
+  <div class="deco-divider fade-in">
+    <div class="line-h"></div>
+    <div class="diamond"></div>
+    <div class="line-h"></div>
+  </div>
 
   <!-- ============================================================
        PROJECTS
