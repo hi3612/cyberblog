@@ -57,11 +57,14 @@ function initBootSequence(callback) {
   const log = document.getElementById('boot-log');
   if (!screen || !log) { callback(); return; }
 
-  // Safety timeout: force dismiss after 6 seconds
+  // Safety timeout: force dismiss after 10 seconds
+  let bootDone = false;
   const safetyTimer = setTimeout(() => {
+    if (bootDone) return;
+    bootDone = true;
     screen.classList.add('done');
     callback();
-  }, 6000);
+  }, 10000);
   const lines = [
     { t: 'CYBER//BLOG Firmware v4.7.1', c: '' },
     { t: '', c: '' },
@@ -85,6 +88,8 @@ function initBootSequence(callback) {
   let i = 0;
   function next() {
     if (i >= lines.length) {
+      if (bootDone) return;
+      bootDone = true;
       clearTimeout(safetyTimer);
       setTimeout(() => { screen.classList.add('done'); setTimeout(callback, 600); }, 300);
       return;
@@ -321,7 +326,6 @@ function initAuthUI() {
       const avatar = area.querySelector('.user-avatar');
       const dropdown = area.querySelector('.user-dropdown');
       avatar.addEventListener('click', e => { e.stopPropagation(); dropdown.classList.toggle('open'); });
-      document.addEventListener('click', () => dropdown.classList.remove('open'));
       area.querySelector('[data-action="logout"]').addEventListener('click', e => { e.preventDefault(); DB.setCurrentUser(null); renderAuthArea(); showToast('已退出登录'); });
       area.querySelector('[data-action="history"]').addEventListener('click', e => { e.preventDefault(); showReadingHistory(); dropdown.classList.remove('open'); });
       area.querySelector('[data-action="likes"]').addEventListener('click', e => { e.preventDefault(); showMyLikes(); dropdown.classList.remove('open'); });
@@ -354,7 +358,6 @@ function initAuthUI() {
     document.getElementById('auth-form').reset();
   }
 
-  document.getElementById('btn-login') && document.getElementById('btn-login').addEventListener('click', openAuthModal);
   document.getElementById('auth-close').addEventListener('click', () => { authModal.classList.remove('open'); document.body.style.overflow = ''; });
   authModal.addEventListener('click', e => { if (e.target === authModal) { authModal.classList.remove('open'); document.body.style.overflow = ''; } });
   document.getElementById('auth-switch').addEventListener('click', e => { e.preventDefault(); isRegister = !isRegister; updateAuthForm(); });
@@ -393,6 +396,12 @@ function initAuthUI() {
       renderAuthArea();
       showToast('欢迎回来，' + username);
     }
+  });
+
+  // Single global handler for closing user dropdowns
+  document.addEventListener('click', () => {
+    const openDropdown = document.querySelector('.user-dropdown.open');
+    if (openDropdown) openDropdown.classList.remove('open');
   });
 
   window._renderAuthArea = renderAuthArea;
@@ -440,7 +449,7 @@ function initBlogSection() {
           <div class="card-sweep"></div>
           <div class="blog-card-header">
             <span class="blog-card-date">${post.date}</span>
-            <span class="blog-card-readtime">${post.readtime} · ${(post.views || 0) + postLikes.length} views</span>
+            <span class="blog-card-readtime">${post.readtime} · ${post.views || 0} 阅读</span>
           </div>
           <h3 class="blog-card-title">${post.title}</h3>
           <p class="blog-card-excerpt">${post.excerpt}</p>
@@ -474,14 +483,13 @@ function initBlogSection() {
       DB.saveReadingHistory(filtered.slice(0, 20));
     }
 
-    const views = Math.max(post.views || 0, ...[]);
+    const views = post.views || 0;
     const tocHTML = genTOC(post.content);
     const contentWithCopy = addCopyBtns(post.content);
     const relatedHTML = genRelated(post);
     const commentsHTML = genComments(post.id);
     const likes = DB.getLikes();
     const postLikes = likes[post.id] || [];
-    const user = DB.getCurrentUser();
     const isLiked = user ? postLikes.includes(user.id) : false;
 
     modalBody.innerHTML = `
@@ -511,7 +519,7 @@ function initBlogSection() {
     // Bind share buttons
     modalBody.querySelectorAll('.share-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        if (btn.dataset.action === 'copy-url') { navigator.clipboard.writeText(window.location.href).then(() => { btn.textContent = '已复制!'; setTimeout(() => btn.textContent = '复制链接', 1500); }); }
+        if (btn.dataset.action === 'copy-url') { navigator.clipboard.writeText(window.location.href).then(() => { btn.textContent = '已复制!'; setTimeout(() => btn.textContent = '复制链接', 1500); }).catch(() => {}); }
         if (btn.dataset.action === 'copy-title') { navigator.clipboard.writeText(post.title).then(() => { btn.textContent = '已复制!'; setTimeout(() => btn.textContent = '复制标题', 1500); }); }
       });
     });
@@ -547,11 +555,10 @@ function initBlogSection() {
         comments.push({ id: Date.now(), postId: post.id, userId: user.id, username: user.username, text, date: new Date().toISOString() });
         DB.saveComments(comments);
         textarea.value = '';
-        // Refresh comments
-        const commentsSection = modalBody.querySelector('.comments-section');
-        if (commentsSection) {
-          const newCommentsHTML = genCommentsContent(post.id);
-          commentsSection.innerHTML = newCommentsHTML;
+        // Refresh only the comments list, preserving the form
+        const commentsList = modalBody.querySelector('.comments-list');
+        if (commentsList) {
+          commentsList.innerHTML = genCommentsContent(post.id);
           bindCommentDelete(modalBody, post.id);
         }
       });
@@ -562,6 +569,8 @@ function initBlogSection() {
     modalOverlay.classList.add('open');
     document.body.style.overflow = 'hidden';
   }
+
+  window._openPostModal = openPostModal;
 
   function closeModal() { modalOverlay.classList.remove('open'); document.body.style.overflow = ''; currentPostId = null; }
   modalClose.addEventListener('click', closeModal);
@@ -587,7 +596,7 @@ function toggleLike(postId, btn) {
 
 /* --- TOC --- */
 function genTOC(content) {
-  const re = /<h2>(.*?)<\/h2>/g; const h = []; let m;
+  const re = /<h2[^>]*>(.*?)<\/h2>/g; const h = []; let m;
   while ((m = re.exec(content)) !== null) h.push(m[1].replace(/<[^>]*>/g, ''));
   if (h.length === 0) return '';
   return `<div class="post-toc"><div class="post-toc-title">> TABLE_OF_CONTENTS</div>${h.map((t, i) => `<a href="#" data-toc="${i}">${t}</a>`).join('')}</div>`;
@@ -595,7 +604,7 @@ function genTOC(content) {
 
 /* --- Copy Buttons --- */
 function addCopyBtns(content) {
-  return content.replace(/(<pre>[\s\S]*?<\/pre>)/g, m => `<div class="code-block-wrapper">${m}<button class="copy-btn">复制</button></div>`);
+  return content.replace(/(<pre[^>]*>[\s\S]*?<\/pre>)/g, m => `<div class="code-block-wrapper">${m}<button class="copy-btn">复制</button></div>`);
 }
 
 /* --- Related Posts --- */
@@ -639,10 +648,6 @@ function bindCommentDelete(container, postId) {
       DB.saveComments(comments);
       const list = container.querySelector('.comments-list');
       if (list) { list.innerHTML = genCommentsContent(postId); bindCommentDelete(container, postId); }
-      const section = container.querySelector('.comments-section');
-      if (section && document.getElementById('comment-form')) {
-        // Re-bind the fresh comment form
-      }
     });
   });
 
@@ -735,16 +740,15 @@ function showReadingHistory() {
         if (post) {
           modal.classList.remove('open');
           document.body.style.overflow = '';
-          // Re-open with the selected post
+          // Close modal, then re-open with the selected post
           setTimeout(() => {
-            const grid = document.getElementById('blog-grid');
-            document.getElementById('blog').scrollIntoView({ behavior: 'smooth' });
-          }, 300);
+            modal.classList.remove('open');
+            if (window._openPostModal) window._openPostModal(post);
+          }, 200);
         }
       });
     });
   }
-  modal.querySelector('#modal-close') && modal.querySelector('#modal-close').click === undefined || true;
   modal.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -768,9 +772,10 @@ function showMyLikes() {
         const pid = parseInt(item.dataset.postId);
         const post = blogPosts.find(p => p.id === pid);
         if (post) {
-          modal.classList.remove('open');
-          document.body.style.overflow = '';
-          setTimeout(() => { const blogEl = document.getElementById('blog'); blogEl.scrollIntoView({ behavior: 'smooth' }); }, 200);
+          setTimeout(() => {
+            modal.classList.remove('open');
+            if (window._openPostModal) window._openPostModal(post);
+          }, 200);
         }
       });
     });
@@ -789,12 +794,6 @@ function initGlobalModals() {
       document.body.style.overflow = '';
     }
   });
-
-  // Close post modal on X
-  const pmClose = document.getElementById('modal-close');
-  if (pmClose) pmClose.addEventListener('click', () => { document.getElementById('post-modal').classList.remove('open'); document.body.style.overflow = ''; });
-  const pmOverlay = document.getElementById('post-modal');
-  if (pmOverlay) pmOverlay.addEventListener('click', e => { if (e.target === pmOverlay) { pmOverlay.classList.remove('open'); document.body.style.overflow = ''; } });
 }
 
 /* --- Newsletter --- */
@@ -911,8 +910,8 @@ function initKonamiCode() {
 }
 
 function triggerEgg() {
-  const t = document.createElement('div'); t.className = 'easter-egg-toast'; t.textContent = '>>> CYBERPUNK MODE ACTIVATED <<<'; document.body.appendChild(t); setTimeout(() => t.remove(), 3000);
-  document.body.style.transition = 'background 0.2s'; document.body.style.background = '#ff00ff'; setTimeout(() => document.body.style.background = '', 200);
+  const t = document.createElement('div'); t.className = 'easter-egg-toast'; t.textContent = '>>> CYBERPUNK MODE ACTIVATED <<<'; document.body.appendChild(t); setTimeout(() => t.remove(), 3500);
+  document.body.style.transition = 'background 0.2s'; document.body.style.background = '#ff00ff'; setTimeout(() => { document.body.style.background = ''; document.body.style.transition = ''; }, 200);
 }
 
 /* --- RSS --- */
@@ -921,6 +920,6 @@ function initRSS() {
     e.preventDefault();
     const items = blogPosts.map(p => `<item><title><![CDATA[${p.title}]]></title><link>${location.origin}${location.pathname}?post=${p.id}</link><description><![CDATA[${p.excerpt}]]></description><pubDate>${new Date(p.date).toUTCString()}</pubDate></item>`).join('');
     const rss = `<?xml version="1.0"?><rss version="2.0"><channel><title>终末之剑 | CYBER//BLOG</title><link>${location.origin}${location.pathname}</link><description>赛博朋克个人博客</description><language>zh-CN</language>${items}</channel></rss>`;
-    const blob = new Blob([rss], { type: 'application/rss+xml' }); window.open(URL.createObjectURL(blob), '_blank');
+    const url = URL.createObjectURL(new Blob([rss], { type: 'application/rss+xml' })); const w = window.open(url, '_blank'); setTimeout(() => URL.revokeObjectURL(url), 5000);
   }));
 }

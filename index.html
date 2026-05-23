@@ -47,9 +47,9 @@
         <li><a href="#guestbook">Guestbook</a></li>
         <li>
           <div class="theme-switcher">
-            <span class="theme-dot green active" data-theme="green" title="Neon Green"></span>
-            <span class="theme-dot cyan" data-theme="cyan" title="Neon Cyan"></span>
-            <span class="theme-dot magenta" data-theme="magenta" title="Neon Magenta"></span>
+            <span class="theme-dot green active" data-theme="green" title="Neon Green" role="button" tabindex="0" aria-label="绿色主题"></span>
+            <span class="theme-dot cyan" data-theme="cyan" title="Neon Cyan" role="button" tabindex="0" aria-label="青色主题"></span>
+            <span class="theme-dot magenta" data-theme="magenta" title="Neon Magenta" role="button" tabindex="0" aria-label="品红主题"></span>
           </div>
         </li>
         <li id="nav-auth-area">
@@ -113,7 +113,6 @@
         </div>
       </div>
       <div id="blog-grid" class="blog-grid"><!-- JS render --></div>
-      <div class="pagination" id="blog-pagination" style="display:none;"></div>
     </div>
   </section>
 
@@ -252,7 +251,7 @@
   <!-- Back to Top -->
   <button id="back-to-top" class="back-to-top" aria-label="Back to top">
     <svg width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="50" stroke-dashoffset="50" id="scroll-ring"/></svg>
-    <span style="position:absolute;">&#8593;</span>
+    <span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;">&#8593;</span>
   </button>
 
   <!-- ============================================================
