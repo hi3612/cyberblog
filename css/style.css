@@ -63,7 +63,7 @@ body {
   line-height: 1.7;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
-  cursor: crosshair;
+  cursor: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><defs><filter id='g'><feGaussianBlur stdDeviation='0.5'/></filter></defs><circle cx='12' cy='12' r='2' fill='none' stroke='%2300ff41' stroke-width='1.5' filter='url(%23g)'/><circle cx='12' cy='12' r='5' fill='none' stroke='%2300ff41' stroke-width='0.5' opacity='0.5'/><line x1='12' y1='2' x2='12' y2='7' stroke='%2300ff41' stroke-width='1' filter='url(%23g)'/><line x1='12' y1='17' x2='12' y2='22' stroke='%2300ff41' stroke-width='1' filter='url(%23g)'/><line x1='2' y1='12' x2='7' y2='12' stroke='%2300ff41' stroke-width='1' filter='url(%23g)'/><line x1='17' y1='12' x2='22' y2='12' stroke='%2300ff41' stroke-width='1' filter='url(%23g)'/><line x1='5' y1='5' x2='7' y2='7' stroke='%2300d4ff' stroke-width='1' opacity='0.6'/><line x1='19' y1='5' x2='17' y2='7' stroke='%2300d4ff' stroke-width='1' opacity='0.6'/><line x1='5' y1='19' x2='7' y2='17' stroke='%2300d4ff' stroke-width='1' opacity='0.6'/><line x1='19' y1='19' x2='17' y2='17' stroke='%2300d4ff' stroke-width='1' opacity='0.6'/></svg>") 12 12, crosshair;
 }
 
 /* ============================================================
@@ -97,9 +97,12 @@ body::before {
 
 /* Noise grain — applied via JS canvas */
 
-a { color: var(--neon-primary); text-decoration: none; transition: var(--transition); }
+a { color: var(--neon-primary); text-decoration: none; transition: var(--transition); cursor: pointer; }
 a:hover { text-shadow: 0 0 8px var(--neon-primary), 0 0 20px var(--neon-primary); }
 img { max-width: 100%; display: block; }
+button, .btn, input[type="submit"] { cursor: pointer; }
+input[type="text"], input[type="email"], input[type="password"], textarea { cursor: text; }
+.blog-card, .project-card, .stat-card { cursor: pointer; }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 5px; }
