@@ -1,52 +1,93 @@
 [
   {
-    "id": 1,
-    "title": "从零构建赛博朋克风格个人网站",
-    "date": "2026-05-20",
-    "readtime": "8 min",
-    "category": "frontend",
+    "id": 1, "title": "从零构建赛博朋克风格个人网站", "date": "2026-05-20",
+    "readtime": "8 min", "category": "frontend",
     "tags": ["CSS", "设计", "动画"],
-    "excerpt": "从设计灵感到代码实现，完整记录如何用纯 HTML/CSS/JS 构建一个赛博朋克风格的个人网站，包含霓虹发光、CRT 扫描线、终端模拟等视觉效果。",
+    "excerpt": "从设计灵感到代码实现，完整记录如何用纯 HTML/CSS/JS 构建一个赛博朋克风格的个人网站。",
     "file": "1-build-cyberpunk-blog.md"
   },
   {
-    "id": 2,
-    "title": "现代 CSS 动画技巧完全指南",
-    "date": "2026-05-15",
-    "readtime": "12 min",
-    "category": "frontend",
+    "id": 2, "title": "现代 CSS 动画技巧完全指南", "date": "2026-05-15",
+    "readtime": "12 min", "category": "frontend",
     "tags": ["CSS", "动画", "性能优化"],
-    "excerpt": "深入探讨 CSS 动画的最佳实践：从关键帧设计到性能优化，从 IntersectionObserver 到 prefers-reduced-motion，打造流畅且可访问的动画体验。",
+    "excerpt": "深入探讨 CSS 动画的最佳实践，从关键帧设计到性能优化，打造流畅且可访问的动画体验。",
     "file": "2-css-animation-guide.md"
   },
   {
-    "id": 3,
-    "title": "为什么每个开发者都应该拥有个人博客",
-    "date": "2026-05-10",
-    "readtime": "6 min",
-    "category": "career",
+    "id": 3, "title": "为什么每个开发者都应该拥有个人博客", "date": "2026-05-10",
+    "readtime": "6 min", "category": "career",
     "tags": ["职业发展", "写作", "个人品牌"],
-    "excerpt": "在 AI 时代，个人博客比以往任何时候都更重要。它不仅是技术能力的证明，更是建立个人品牌、深化学习、连接同行的最佳方式。",
+    "excerpt": "在 AI 时代，个人博客比以往任何时候都更重要。它是建立个人品牌的最佳方式。",
     "file": "3-why-blogging.md"
   },
   {
-    "id": 4,
-    "title": "Web 性能优化的 10 个实用技巧",
-    "date": "2026-05-05",
-    "readtime": "10 min",
-    "category": "frontend",
+    "id": 4, "title": "Web 性能优化的 10 个实用技巧", "date": "2026-05-05",
+    "readtime": "10 min", "category": "frontend",
     "tags": ["性能优化", "Web Vitals", "最佳实践"],
-    "excerpt": "从 Core Web Vitals 到资源加载策略，分享 10 个经过实战验证的性能优化技巧，让你的网站在 Lighthouse 上拿到满分。",
+    "excerpt": "从 Core Web Vitals 到资源加载策略，10 个经过实战验证的性能优化技巧。",
     "file": "4-web-perf-tips.md"
   },
   {
-    "id": 5,
-    "title": "赛博朋克美学：从文学到 UI 设计",
-    "date": "2026-04-28",
-    "readtime": "7 min",
-    "category": "design",
+    "id": 5, "title": "赛博朋克美学：从文学到 UI 设计", "date": "2026-04-28",
+    "readtime": "7 min", "category": "design",
     "tags": ["设计", "赛博朋克", "UI/UX"],
-    "excerpt": "赛博朋克不仅是一种科幻流派，更是一套完整的设计语言。探讨如何从威廉·吉布森的小说到现代 UI，提炼赛博朋克的核心美学原则。",
+    "excerpt": "赛博朋克不仅是科幻流派，更是一套完整的设计语言。从文学到现代 UI 的美学探讨。",
     "file": "5-cyberpunk-aesthetics.md"
+  },
+  {
+    "id": 6, "title": "终端技巧：让你的命令行效率翻倍", "date": "2026-04-20",
+    "readtime": "5 min", "category": "frontend",
+    "tags": ["终端", "命令行", "效率"],
+    "excerpt": "20 个实用终端技巧，包括别名、历史搜索、管道操作、Tmux 和模糊搜索。",
+    "file": "6-terminal-tricks.md"
+  },
+  {
+    "id": 7, "title": "Git 工作流最佳实践", "date": "2026-04-12",
+    "readtime": "7 min", "category": "frontend",
+    "tags": ["Git", "版本控制", "协作"],
+    "excerpt": "十年 Git 使用经验总结：Commit 规范、分支策略、Rebase vs Merge、交互式暂存。",
+    "file": "7-git-workflow.md"
+  },
+  {
+    "id": 8, "title": "TypeScript 设计模式精粹", "date": "2026-04-05",
+    "readtime": "6 min", "category": "frontend",
+    "tags": ["TypeScript", "设计模式", "类型系统"],
+    "excerpt": "提升代码质量的 5 个 TypeScript 设计模式：联合类型、类型守卫、泛型约束等。",
+    "file": "8-typescript-patterns.md"
+  },
+  {
+    "id": 9, "title": "如何高效学习一门新编程语言", "date": "2026-03-28",
+    "readtime": "5 min", "category": "career",
+    "tags": ["编程语言", "学习方法", "效率"],
+    "excerpt": "学了 8 门语言后总结的高效学习法：第一天就写代码、读开源项目、用新语言重写旧项目。",
+    "file": "9-learn-new-lang.md"
+  },
+  {
+    "id": 10, "title": "Docker 从入门到生产", "date": "2026-03-20",
+    "readtime": "8 min", "category": "frontend",
+    "tags": ["Docker", "DevOps", "容器化"],
+    "excerpt": "理解 Docker 核心概念：镜像、容器、Compose、卷、Dockerfile 最佳实践和生产检查清单。",
+    "file": "10-docker-basics.md"
+  },
+  {
+    "id": 11, "title": "RESTful API 设计指南", "date": "2026-03-12",
+    "readtime": "7 min", "category": "frontend",
+    "tags": ["API", "REST", "后端"],
+    "excerpt": "设计好 API 的科学与艺术：命名规范、HTTP 状态码、分页过滤、错误格式、版本管理。",
+    "file": "11-apis-design.md"
+  },
+  {
+    "id": 12, "title": "React vs Vue：我的真实使用感受", "date": "2026-03-05",
+    "readtime": "6 min", "category": "frontend",
+    "tags": ["React", "Vue", "框架对比"],
+    "excerpt": "深度使用两个框架后的公正对比：设计哲学、开发体验、性能、生态与就业。",
+    "file": "12-react-vs-vue.md"
+  },
+  {
+    "id": 13, "title": "开发者职业发展路线图", "date": "2026-02-26",
+    "readtime": "8 min", "category": "career",
+    "tags": ["职业发展", "成长", "软技能"],
+    "excerpt": "从初级到高级的成长之路：每个阶段的核心能力、常见误区和最重要的建议。",
+    "file": "13-dev-career.md"
   }
 ]
