@@ -396,7 +396,6 @@ function initAuthUI() {
 
   function updateAuthForm() {
     document.getElementById('auth-title').textContent = isRegister ? '> REGISTER' : '> LOGIN';
-    document.getElementById('auth-email-field').style.display = isRegister ? 'block' : 'none';
     document.getElementById('auth-confirm-field').style.display = isRegister ? 'block' : 'none';
     document.getElementById('auth-submit').textContent = isRegister ? '注册' : '登录';
     document.getElementById('auth-switch-text').textContent = isRegister ? '已有账号？' : '没有账号？';
@@ -422,11 +421,10 @@ function initAuthUI() {
     const users = DB.getUsers();
 
     if (isRegister) {
-      const email = document.getElementById('auth-email').value.trim();
       const confirm = document.getElementById('auth-confirm').value;
       if (password !== confirm) { errEl.textContent = '两次密码不一致'; errEl.style.display = 'block'; return; }
       if (users.find(u => u.username === username)) { errEl.textContent = '用户名已存在'; errEl.style.display = 'block'; return; }
-      const newUser = { id: Date.now(), username, email, password, createdAt: new Date().toISOString() };
+      const newUser = { id: Date.now(), username, password, createdAt: new Date().toISOString() };
       users.push(newUser);
       DB.saveUsers(users);
       DB.setCurrentUser(newUser);
