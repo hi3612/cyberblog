@@ -64,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initManual();
     initNeonDrawing();
     initNeonClock();
+    initFullscreen();
 
     // 非核心功能延迟加载，优先保证首屏速度
     if (window.requestIdleCallback) {
@@ -2326,6 +2327,38 @@ function initNeonClock() {
 
   update();
   setInterval(update, 1000);
+}
+
+/* ============================================================
+   FULLSCREEN API
+   ============================================================ */
+function initFullscreen() {
+  const btn = document.getElementById('btn-fullscreen');
+  if (!btn) return;
+
+  btn.addEventListener('click', toggleFullscreen);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key.toLowerCase() === 'f' && !e.ctrlKey && !e.metaKey && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+      toggleFullscreen();
+    }
+  });
+
+  document.addEventListener('fullscreenchange', updateBtn);
+}
+
+function toggleFullscreen() {
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  } else {
+    document.documentElement.requestFullscreen();
+  }
+}
+
+function updateBtn() {
+  const btn = document.getElementById('btn-fullscreen');
+  if (!btn) return;
+  btn.innerHTML = document.fullscreenElement ? '&#9974; 退出' : '&#9974; 全屏';
 }
 
 function getTimeDisplay() {
