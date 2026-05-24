@@ -1819,6 +1819,49 @@ body.glitch-active {
 }
 
 /* ============================================================
+   INTERACTIVE AVATAR
+   ============================================================ */
+.avatar-interactive {
+  transition: filter 0.5s !important;
+  cursor: pointer;
+}
+.avatar-interactive:hover {
+  filter: drop-shadow(0 0 14px #00ff41) drop-shadow(0 0 40px rgba(0,255,65,.5)) !important;
+}
+.avatar-interactive:hover .halo-ring1 { animation: halo-pulse .8s ease-in-out infinite; }
+.avatar-interactive:hover .halo-ring2 { animation: halo-pulse 1s ease-in-out .3s infinite; }
+.avatar-interactive:hover .blade-core { animation: core-flash .6s ease-in-out infinite; }
+.avatar-interactive:hover .guard-gem { animation: gem-glow .5s ease-in-out infinite; }
+.avatar-interactive:hover .pommel-core { animation: gem-glow .7s ease-in-out .2s infinite; }
+.avatar-interactive:hover .particle { animation: float-particle 1.2s ease-in-out infinite; }
+.avatar-interactive:hover .particle.p2 { animation-delay: .3s; }
+.avatar-interactive:hover .particle.p3 { animation-delay: .5s; }
+.avatar-interactive:hover .particle.p4 { animation-delay: .7s; }
+.avatar-interactive:hover .circuit-l { animation: circuit-pulse 1s ease-in-out infinite; }
+.avatar-interactive:hover .circuit-r { animation: circuit-pulse 1s ease-in-out .5s infinite; }
+
+@keyframes halo-pulse {
+  0%,100% { opacity: .15; transform: scaleY(1); }
+  50% { opacity: .35; transform: scaleY(1.6); }
+}
+@keyframes core-flash {
+  0%,100% { opacity: .4; }
+  50% { opacity: .9; }
+}
+@keyframes gem-glow {
+  0%,100% { opacity: 1; }
+  50% { opacity: .3; }
+}
+@keyframes float-particle {
+  0%,100% { transform: translateY(0); opacity: .4; }
+  50% { transform: translateY(-8px); opacity: .8; }
+}
+@keyframes circuit-pulse {
+  0%,100% { opacity: .25; }
+  50% { opacity: .6; }
+}
+
+/* ============================================================
    PRINT STYLES
    ============================================================ */
 @media print {
