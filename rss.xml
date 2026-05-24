@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>终末之剑 | CYBER//BLOG</title>
+    <link>https://hi3612.github.io/cyberblog/</link>
+    <description>赛博朋克风格个人技术博客 — 技术分享、设计美学与代码艺术</description>
+    <language>zh-CN</language>
+    <lastBuildDate>2026-05-24T00:00:00+08:00</lastBuildDate>
+
+    <item>
+      <title>从零构建赛博朋克风格个人网站</title>
+      <link>https://hi3612.github.io/cyberblog/</link>
+      <description>从设计灵感到代码实现，完整记录如何用纯 HTML/CSS/JS 构建一个赛博朋克风格的个人网站</description>
+      <pubDate>2026-05-20T00:00:00+08:00</pubDate>
+      <category>frontend</category>
+    </item>
+
+    <item>
+      <title>现代 CSS 动画技巧完全指南</title>
+      <link>https://hi3612.github.io/cyberblog/</link>
+      <description>深入探讨 CSS 动画的最佳实践：从关键帧设计到性能优化</description>
+      <pubDate>2026-05-15T00:00:00+08:00</pubDate>
+      <category>frontend</category>
+    </item>
+
+    <item>
+      <title>为什么每个开发者都应该拥有个人博客</title>
+      <link>https://hi3612.github.io/cyberblog/</link>
+      <description>在 AI 时代，个人博客比以往任何时候都更重要。它不仅是技术能力的证明，更是建立个人品牌的最佳方式</description>
+      <pubDate>2026-05-10T00:00:00+08:00</pubDate>
+      <category>career</category>
+    </item>
+
+    <item>
+      <title>Web 性能优化的 10 个实用技巧</title>
+      <link>https://hi3612.github.io/cyberblog/</link>
+      <description>从 Core Web Vitals 到资源加载策略，分享 10 个经过实战验证的性能优化技巧</description>
+      <pubDate>2026-05-05T00:00:00+08:00</pubDate>
+      <category>frontend</category>
+    </item>
+
+    <item>
+      <title>赛博朋克美学：从文学到 UI 设计</title>
+      <link>https://hi3612.github.io/cyberblog/</link>
+      <description>赛博朋克不仅是一种科幻流派，更是一套完整的设计语言</description>
+      <pubDate>2026-04-28T00:00:00+08:00</pubDate>
+      <category>design</category>
+    </item>
+  </channel>
+</rss>

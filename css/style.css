@@ -3,7 +3,9 @@
    Neon // Chrome // Dystopia
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+/* 字体: 优先用系统自带，无需联网，国内秒开
+   JetBrains Mono → Cascadia Code → Consolas → monospace
+   Orbitron → Impact → Arial Black → sans-serif */
 
 /* --- CSS Custom Properties --- */
 :root {
@@ -27,8 +29,8 @@
   --border:        #0f2d1f;
   --border-glow:   #00ff4133;
 
-  --font-mono:     'JetBrains Mono', 'Consolas', monospace;
-  --font-display:  'Orbitron', 'Arial', sans-serif;
+  --font-mono:     'Cascadia Code', 'Consolas', 'Courier New', monospace;
+  --font-display:  'Impact', 'Arial Black', 'Arial', sans-serif;
 
   --radius-sm:     4px;
   --radius-md:     8px;
@@ -1814,6 +1816,29 @@ body.glitch-active {
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .boot-log { font-size: 0.68rem; padding: 24px 16px; }
   .comment-form { flex-direction: column; }
+}
+
+/* ============================================================
+   PRINT STYLES
+   ============================================================ */
+@media print {
+  body::before, body::after, .vignette, #noise-canvas, #matrix-bg,
+  #network-bg, .nav, .hero-cta, .back-to-top, .cyber-oracle-btn,
+  #reading-progress, #boot-screen, .mouse-glow, .glitch-flash,
+  .cursor-trail, .dblclick-particle, .news-ticker, .footer,
+  .deco-divider, #neon-canvas, #back-to-top { display: none !important; }
+
+  body { background: #fff !important; color: #111 !important; cursor: auto; }
+  .section { padding: 20px 0 !important; }
+  .hero { min-height: auto !important; padding: 20px 0 !important; }
+  .terminal { box-shadow: none !important; border: 1px solid #ccc !important; }
+  .glitch-title { font-size: 1.5rem !important; color: #111 !important; text-shadow: none !important; animation: none !important; }
+  .glitch-title::before, .glitch-title::after { display: none !important; }
+  .blog-card { break-inside: avoid; border: 1px solid #ddd !important; box-shadow: none !important; }
+  .blog-card:hover { transform: none !important; }
+  .blog-card-title { color: #111 !important; }
+  a { color: #0066cc !important; text-shadow: none !important; }
+  .section-title { color: #111 !important; text-shadow: none !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {

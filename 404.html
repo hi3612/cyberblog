@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 | CYBER//BLOG</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Consolas','Courier New',monospace;background:#060608;color:#c0e0c0;display:flex;align-items:center;justify-content:center;min-height:100vh;overflow:hidden}
+    body::after{content:'';position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 4px)}
+    .box{text-align:center;padding:40px;max-width:560px}
+    .glitch{font-family:'Impact','Arial Black',sans-serif;font-size:clamp(4rem,10vw,8rem);font-weight:900;color:#00ff41;text-shadow:0 0 20px #00ff41,0 0 60px #00ff41,3px 3px 0 #ff00ff,-3px -3px 0 #00d4ff;letter-spacing:0.1em;margin-bottom:16px;animation:glitch 2s infinite}
+    @keyframes glitch{0%,100%{transform:translate(0)}20%{transform:translate(-3px,2px)}40%{transform:translate(3px,-1px)}60%{transform:translate(-1px,-2px)}80%{transform:translate(2px,1px)}}
+    .msg{font-size:0.9rem;color:#8ab88a;margin-bottom:32px;line-height:1.8}
+    .btn{display:inline-block;padding:12px 28px;font-family:inherit;font-size:0.85rem;color:#00ff41;border:1px solid #00ff41;text-decoration:none;letter-spacing:0.1em;transition:0.3s;text-transform:uppercase;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))}
+    .btn:hover{box-shadow:0 0 25px #00ff41;background:rgba(0,255,65,0.08)}
+    .terminal-line{text-align:left;margin:16px auto 0;max-width:400px;font-size:0.72rem;color:#3a5a3a;line-height:2}
+    .terminal-line .prompt{color:#00ff41}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div class="glitch">404</div>
+    <p class="msg">> ERROR: PAGE_NOT_FOUND<br>> 你访问的页面不存在于赛博空间中<br>> 可能已被删除、移动或从未存在过</p>
+    <a href="/cyberblog/" class="btn">> 返回首页</a>
+    <div class="terminal-line">
+      <span class="prompt">root@cyberblog:~#</span> trace --last-location<br>
+      [SYS] 信号丢失... 位置无法追踪<br>
+      <span class="prompt">root@cyberblog:~#</span> <span class="cursor" style="display:inline-block;width:8px;height:14px;background:#00ff41;vertical-align:middle;animation:blink 1s step-end infinite"> </span>
+    </div>
+  </div>
+</body>
+</html>
