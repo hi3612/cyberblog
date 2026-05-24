@@ -286,7 +286,7 @@ function initTypingEffect() {
       if (th) { if (th === 'green') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', th); localStorage.setItem('cyberblog-theme', th); document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active')); const dot = document.querySelector(`.theme-dot.${th}`); if (dot) dot.classList.add('active'); result = `主题: ${th}`; }
       else { result = '<span class="error">未知主题。可用: green, cyan, magenta</span>'; }
     } else if (cmd === 'matrix') { window._matrixIntensity = (window._matrixIntensity || 1) + 0.5; if (window._matrixCanvas) window._matrixCanvas.style.opacity = Math.min(0.3, 0.12 * window._matrixIntensity); result = `矩阵强度: ${Math.round(window._matrixIntensity * 100)}%`; }
-    else if (cmd === 'clear') { el.innerHTML = ''; addPrompt(); return; }
+    else if (cmd === 'clear') { el.innerHTML = '<span class="info">终端已清除。输入 help 查看命令，输入 neofetch 恢复界面。</span><br>'; addPrompt(); return; }
     else if (cmd === 'sudo') { result = '<span class="error">Permission denied. 你不是 root。</span>'; }
     else if (cmd === 'play') { startTerminalGame(el); return; }
     else if (cmd === 'ascii') { result = getRandomASCII(); }
