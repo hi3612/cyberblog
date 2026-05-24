@@ -2096,7 +2096,7 @@ const MANUAL_DATA = [
     items: [
       { key: 'help', desc: '显示所有可用命令列表' },
       { key: 'whoami', desc: '显示个人身份信息' },
-      { key: 'neofetch', desc: '显示赛博朋克风格系统信息' },
+      { key: 'neofetch', desc: '显示赛博朋克风格系统信息 (clear 后用此命令恢复终端界面)' },
       { key: 'ls', desc: '列出网站各板块目录' },
       { key: 'cat blog', desc: '跳转到博客板块' },
       { key: 'cat about', desc: '跳转到关于板块' },
@@ -2110,7 +2110,7 @@ const MANUAL_DATA = [
       { key: 'checkin', desc: '每日签到打卡，连续签到有成就' },
       { key: 'glitch', desc: '触发全屏故障抖动特效' },
       { key: 'manual', desc: '打开本功能手册' },
-      { key: 'clear', desc: '清除终端屏幕' },
+      { key: 'clear', desc: '清除终端屏幕 (输入 neofetch 可恢复界面)' },
       { key: 'sudo', desc: '尝试获取管理员权限 (彩蛋)' },
       { key: 'exit', desc: '退出终端会话' },
     ]
@@ -2125,6 +2125,7 @@ const MANUAL_DATA = [
       { key: 'T', desc: '循环切换主题颜色' },
       { key: 'G', desc: '回到页面顶部' },
       { key: 'L', desc: '在文章详情中点赞当前文章' },
+      { key: 'F', desc: '进入/退出浏览器全屏模式' },
       { key: 'Ctrl+K', desc: '打开 VS Code 风格快速命令面板' },
       { key: '终端内 ↑↓', desc: '浏览终端命令历史记录' },
     ]
@@ -2141,6 +2142,7 @@ const MANUAL_DATA = [
       { key: '点击左下角 ★ 按钮', desc: '赛博占卜，随机预言 + 文字加扰揭示动画' },
       { key: '点击导航栏色点', desc: '切换绿/青/品红主题' },
       { key: '点击用户头像', desc: '展开用户菜单 (阅读记录/收藏/退出)' },
+      { key: '点击 ⛮ 全屏按钮', desc: '进入/退出浏览器全屏模式 (或按 F 键)' },
       { key: '点击 ♪ 音效按钮', desc: '开关全局音效反馈' },
       { key: '博客搜索框', desc: '按标题/内容/标签实时过滤文章' },
       { key: '分类标签按钮', desc: '按前端/职业/设计分类筛选文章' },
