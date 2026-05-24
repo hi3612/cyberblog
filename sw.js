@@ -1,4 +1,4 @@
-const CACHE = 'cyberblog-v1';
+const CACHE = 'cyberblog-v3';
 const ASSETS = [
   '/cyberblog/',
   '/cyberblog/index.html',

@@ -35,7 +35,7 @@
   }
   </script>
 
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=3">
   <style>
     /* Critical fallback styles — prevents blank screen if CSS load is slow */
     body { background:#060608; color:#c0e0c0; }
@@ -403,8 +403,8 @@
 
   <canvas id="neon-canvas" style="position:fixed;inset:0;z-index:9994;pointer-events:none;opacity:0;transition:opacity 0.3s;"></canvas>
 
-<script src="js/posts.js"></script>
-  <script src="js/main.js"></script>
+<script src="js/posts.js?v=3"></script>
+  <script src="js/main.js?v=3"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/cyberblog/sw.js').then(() => console.log('[SW] registered'));
