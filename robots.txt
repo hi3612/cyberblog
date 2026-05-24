@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://hi3612.github.io/cyberblog/sitemap.xml
