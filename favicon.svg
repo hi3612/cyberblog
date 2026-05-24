@@ -1,39 +1,89 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
   <defs>
-    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="2" result="blur"/>
-      <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-    <filter id="glow-outer" x="-80%" y="-80%" width="260%" height="260%">
-      <feGaussianBlur stdDeviation="4" result="blur"/>
-      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
+    <filter id="g1"><feGaussianBlur stdDeviation="2.5"/></filter>
+    <filter id="g2"><feGaussianBlur stdDeviation="1.5"/></filter>
+    <filter id="g3"><feGaussianBlur stdDeviation="4"/></filter>
+    <linearGradient id="border-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00ff41"/>
+      <stop offset="50%" stop-color="#00d4ff"/>
+      <stop offset="100%" stop-color="#00ff41"/>
+    </linearGradient>
+    <linearGradient id="scanline" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#00ff41" stop-opacity="0.8"/>
+      <stop offset="5%" stop-color="#00ff41" stop-opacity="0"/>
+      <stop offset="95%" stop-color="#00ff41" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#00ff41" stop-opacity="0.3"/>
+    </linearGradient>
   </defs>
 
-  <!-- Background -->
-  <rect width="100" height="100" rx="16" fill="#060608"/>
+  <!-- BG -->
+  <rect width="128" height="128" rx="18" fill="#050508"/>
 
-  <!-- Outer hex ring -->
-  <polygon points="50,12 83,31 83,69 50,88 17,69 17,31" fill="none" stroke="#00ff41" stroke-width="1.5" filter="url(#glow-outer)" opacity="0.4"/>
+  <!-- Border glow -->
+  <rect x="0" y="0" width="128" height="128" rx="18" fill="none" stroke="url(#border-grad)" stroke-width="2.5" filter="url(#g3)" opacity="0.5"/>
 
-  <!-- Inner hex ring -->
-  <polygon points="50,22 76,35 76,65 50,78 24,65 24,35" fill="none" stroke="#00ff41" stroke-width="2" filter="url(#glow)" opacity="0.7"/>
+  <!-- Scanlines -->
+  <rect width="128" height="128" rx="18" fill="url(#scanline)" opacity="0.4"/>
 
-  <!-- Glitch lines -->
-  <line x1="15" y1="20" x2="40" y2="20" stroke="#00d4ff" stroke-width="0.8" opacity="0.4" filter="url(#glow)"/>
-  <line x1="60" y1="18" x2="85" y2="18" stroke="#ff00ff" stroke-width="0.8" opacity="0.3" filter="url(#glow)"/>
-  <line x1="10" y1="80" x2="35" y2="80" stroke="#00d4ff" stroke-width="0.8" opacity="0.4" filter="url(#glow)"/>
-  <line x1="65" y1="82" x2="90" y2="82" stroke="#ff00ff" stroke-width="0.8" opacity="0.3" filter="url(#glow)"/>
+  <!-- Outer diamond -->
+  <polygon points="64,8 120,64 64,120 8,64" fill="none" stroke="#00ff41" stroke-width="1" filter="url(#g3)" opacity="0.15"/>
 
-  <!-- CB text / terminal cursor -->
-  <text x="50" y="55" font-family="Consolas,monospace" font-size="28" font-weight="bold" fill="#00ff41" text-anchor="middle" filter="url(#glow)">CB</text>
+  <!-- Middle diamond -->
+  <polygon points="64,24 104,64 64,104 24,64" fill="none" stroke="#00d4ff" stroke-width="1.2" filter="url(#g1)" opacity="0.3"/>
 
-  <!-- Terminal prompt -->
-  <text x="50" y="70" font-family="Consolas,monospace" font-size="7" fill="#ff00ff" text-anchor="middle" opacity="0.5">&gt;_</text>
+  <!-- Inner hexagon -->
+  <polygon points="64,32 92,46 92,78 64,92 36,78 36,46" fill="none" stroke="#00ff41" stroke-width="2" filter="url(#g2)" opacity="0.6"/>
 
-  <!-- Corner dots -->
-  <circle cx="12" cy="12" r="2" fill="#00ff41" filter="url(#glow)"/>
-  <circle cx="88" cy="12" r="2" fill="#00ff41" filter="url(#glow)"/>
-  <circle cx="12" cy="88" r="2" fill="#00ff41" filter="url(#glow)"/>
-  <circle cx="88" cy="88" r="2" fill="#00ff41" filter="url(#glow)"/>
+  <!-- Corner circuits: top-left -->
+  <path d="M12,12 h20 v12 M12,12 v20 h12" fill="none" stroke="#ff00ff" stroke-width="1" opacity="0.4" filter="url(#g2)"/>
+  <circle cx="32" cy="24" r="1.5" fill="#00d4ff" filter="url(#g1)" opacity="0.6"/>
+
+  <!-- Corner circuits: top-right -->
+  <path d="M116,12 h-20 v12 M116,12 v20 h-12" fill="none" stroke="#ff00ff" stroke-width="1" opacity="0.4" filter="url(#g2)"/>
+  <circle cx="96" cy="24" r="1.5" fill="#00d4ff" filter="url(#g1)" opacity="0.6"/>
+
+  <!-- Corner circuits: bottom-left -->
+  <path d="M12,116 h20 v-12 M12,116 v-20 h12" fill="none" stroke="#ff00ff" stroke-width="1" opacity="0.4" filter="url(#g2)"/>
+  <circle cx="32" cy="104" r="1.5" fill="#00d4ff" filter="url(#g1)" opacity="0.6"/>
+
+  <!-- Corner circuits: bottom-right -->
+  <path d="M116,116 h-20 v-12 M116,116 v-20 h-12" fill="none" stroke="#ff00ff" stroke-width="1" opacity="0.4" filter="url(#g2)"/>
+  <circle cx="96" cy="104" r="1.5" fill="#00d4ff" filter="url(#g1)" opacity="0.6"/>
+
+  <!-- Data dots along border -->
+  <circle cx="22" cy="8" r="1.2" fill="#00ff41" opacity="0.5"/>
+  <circle cx="44" cy="8" r="1.2" fill="#00ff41" opacity="0.3"/>
+  <circle cx="66" cy="8" r="1.2" fill="#00ff41" opacity="0.5"/>
+  <circle cx="88" cy="8" r="1.2" fill="#00ff41" opacity="0.3"/>
+  <circle cx="110" cy="8" r="1.2" fill="#00ff41" opacity="0.5"/>
+
+  <circle cx="8" cy="22" r="1.2" fill="#00ff41" opacity="0.3"/>
+  <circle cx="8" cy="44" r="1.2" fill="#00ff41" opacity="0.5"/>
+  <circle cx="8" cy="66" r="1.2" fill="#00ff41" opacity="0.3"/>
+  <circle cx="8" cy="88" r="1.2" fill="#00ff41" opacity="0.5"/>
+  <circle cx="8" cy="110" r="1.2" fill="#00ff41" opacity="0.3"/>
+
+  <circle cx="22" cy="120" r="1.2" fill="#00ff41" opacity="0.5"/>
+  <circle cx="44" cy="120" r="1.2" fill="#00ff41" opacity="0.3"/>
+  <circle cx="66" cy="120" r="1.2" fill="#00ff41" opacity="0.5"/>
+  <circle cx="88" cy="120" r="1.2" fill="#00ff41" opacity="0.3"/>
+  <circle cx="110" cy="120" r="1.2" fill="#00ff41" opacity="0.5"/>
+
+  <circle cx="120" cy="22" r="1.2" fill="#00ff41" opacity="0.3"/>
+  <circle cx="120" cy="44" r="1.2" fill="#00ff41" opacity="0.5"/>
+  <circle cx="120" cy="66" r="1.2" fill="#00ff41" opacity="0.3"/>
+  <circle cx="120" cy="88" r="1.2" fill="#00ff41" opacity="0.5"/>
+  <circle cx="120" cy="110" r="1.2" fill="#00ff41" opacity="0.3"/>
+
+  <!-- Crosshair center -->
+  <line x1="64" y1="18" x2="64" y2="42" stroke="#00ff41" stroke-width="0.5" opacity="0.2"/>
+  <line x1="64" y1="86" x2="64" y2="110" stroke="#00ff41" stroke-width="0.5" opacity="0.2"/>
+  <line x1="18" y1="64" x2="42" y2="64" stroke="#00ff41" stroke-width="0.5" opacity="0.2"/>
+  <line x1="86" y1="64" x2="110" y2="64" stroke="#00ff41" stroke-width="0.5" opacity="0.2"/>
+
+  <!-- Japanese 終 (end/apocalypse) — stylized cyberpunk name reference -->
+  <text x="64" y="67" font-family="serif" font-size="36" font-weight="900" fill="none" stroke="#00ff41" stroke-width="2" text-anchor="middle" filter="url(#g1)">終</text>
+
+  <!-- Terminal prompt below -->
+  <text x="64" y="102" font-family="Consolas,monospace" font-size="8" fill="#ff00ff" text-anchor="middle" opacity="0.4" filter="url(#g2)">CYBER//BLOG</text>
 </svg>
