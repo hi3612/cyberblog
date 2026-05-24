@@ -242,6 +242,7 @@ function initTypingEffect() {
   function finishTyping() {
     const c = el.querySelector('.cursor'); if (c) c.remove();
     addPrompt();
+    window._addTerminalPrompt = addPrompt;
   }
 
   function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
@@ -915,7 +916,11 @@ function initParticles() {
 /* --- Live Clock --- */
 function initLiveClock() {
   const clock = document.getElementById('live-clock'); if (!clock) return;
-  function t() { const n = new Date(); clock.textContent = `[${n.toISOString().replace('T', ' | ').slice(0, 19)} UTC+8]`; }
+  function t() {
+    const n = new Date();
+    const cst = new Date(n.getTime() + 8 * 3600000);
+    clock.textContent = `[${cst.toISOString().replace('T', ' | ').slice(0, 19)} CST]`;
+  }
   t(); setInterval(t, 1000);
 }
 
@@ -1677,7 +1682,7 @@ function startTerminalGame(el) {
     if (grade === 'S') unlockAchievement('terminal_user');
 
     // 移除游戏输入框，恢复终端
-    setTimeout(addPrompt, 1500);
+    if (window._addTerminalPrompt) setTimeout(window._addTerminalPrompt, 1500);
   }
 }
 
